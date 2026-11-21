@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FLA Exam Playbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Plan: a drafting-sheet playbook. Cool paper, one teal accent, mono for anything a machine reads.
+     Layout: sticky tab rail over a single 1100px column of dense tables and lab panels. */
+  --paper: #edf1f0; --card: #ffffff; --ink: #13201e; --ink-2: #3a4b48; --muted: #596b68;
+  --line: #d2dbd8; --line-2: #e5ebe9; --accent: #0b7a6a; --accent-ink: #ffffff; --accent-soft: #d6eee8;
+  --warn: #8f5206; --warn-soft: #fbefd8; --bad: #b42318; --bad-soft: #fde5e2; --good: #17703f; --good-soft: #dcf3e4;
+  --grid: rgba(19, 32, 30, .045);
+  --display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0c1413; --card: #132120; --ink: #e6f0ee; --ink-2: #bdd0cc; --muted: #94aaa6;
+    --line: #28423f; --line-2: #1d3230; --accent: #46cbb2; --accent-ink: #062019; --accent-soft: #15423b;
+    --warn: #f0b45a; --warn-soft: #3a2a0f; --bad: #ff8c80; --bad-soft: #43201c; --good: #6fd89a; --good-soft: #14392a;
+    --grid: rgba(230, 240, 238, .05); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0c1413; --card: #132120; --ink: #e6f0ee; --ink-2: #bdd0cc; --muted: #94aaa6;
+  --line: #28423f; --line-2: #1d3230; --accent: #46cbb2; --accent-ink: #062019; --accent-soft: #15423b;
+  --warn: #f0b45a; --warn-soft: #3a2a0f; --bad: #ff8c80; --bad-soft: #43201c; --good: #6fd89a; --good-soft: #14392a;
+  --grid: rgba(230, 240, 238, .05); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 400 15px/1.55 var(--body);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 28px 28px; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h1 { font-size: clamp(28px, 4.6vw, 44px); font-weight: 700; }
+h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+h3 { font-size: 16px; font-weight: 600; }
+p { margin: 0 0 10px; max-width: 70ch; }
+a { color: var(--accent); }
+code, pre, textarea, .mono { font-family: var(--mono); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+.rail { position: sticky; top: 0; z-index: 10; background: var(--card); border-bottom: 1px solid var(--line); }
+.rail-in { max-width: 1100px; margin: 0 auto; padding: 0 16px; display: flex; align-items: center; gap: 14px; }
+.brand { font-family: var(--display); font-weight: 700; font-size: 17px; white-space: nowrap; display: flex; gap: 8px; align-items: baseline; }
+.brand b { color: var(--accent); font-family: var(--mono); font-weight: 500; }
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: thin; flex: 1; }
+.tabs a { padding: 12px 12px; text-decoration: none; color: var(--muted); font-weight: 500; white-space: nowrap; border-bottom: 3px solid transparent; font-size: 14px; }
+.tabs a:hover { color: var(--ink); }
+.tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--accent); }
+main { max-width: 1100px; margin: 0 auto; padding: 22px 16px 80px; }
+.view > * + * { margin-top: 22px; }
+
+.hero { display: grid; gap: 14px; }
+.eyebrow { font: 500 12px/1 var(--mono); color: var(--accent); letter-spacing: .06em; text-transform: uppercase; }
+.lede { font-size: 17px; color: var(--ink-2); max-width: 62ch; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 2px; }
+.stat .big { font: 700 34px/1 var(--display); color: var(--accent); font-variant-numeric: tabular-nums; }
+.stat .big small { font-size: 16px; color: var(--muted); font-weight: 500; }
+.stat span { color: var(--ink-2); font-size: 14px; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+.card > h2 + p, .card > h3 + p { color: var(--ink-2); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.blueprint { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.bp { border-left: 4px solid var(--accent); padding: 6px 0 6px 12px; }
+.bp b { font-family: var(--mono); font-size: 13px; display: block; }
+.bp span { font-size: 14px; color: var(--ink-2); }
+
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--card); }
+.seg button { border: 0; background: transparent; padding: 7px 12px; font: 500 13px var(--body); color: var(--muted); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+button.btn, .btn { border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 7px 13px; border-radius: 8px; font: 500 14px var(--body); cursor: pointer; }
+button.btn:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+select, input[type=text], textarea { font: 400 14px var(--mono); color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; max-width: 100%; }
+textarea { width: 100%; min-height: 150px; line-height: 1.5; resize: vertical; tab-size: 2; }
+input[type=range] { accent-color: var(--accent); }
+label { font-size: 13px; color: var(--muted); font-weight: 500; }
+.field { display: grid; gap: 4px; }
+
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+th { font: 600 12.5px var(--body); color: var(--muted); letter-spacing: .01em; background: var(--card); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: center; font-variant-numeric: tabular-nums; }
+.mono-cell { font-family: var(--mono); font-size: 13px; }
+
+.heat th.paper { text-align: center; min-width: 74px; }
+.heat td.hc { text-align: center; font: 500 12px var(--mono); padding: 6px 4px; min-width: 74px; }
+.heat td.hit { background: var(--accent-soft); color: var(--ink); box-shadow: inset 0 0 0 1px var(--accent); }
+.heat td.hit15 { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.heat td.miss { color: var(--line); }
+.heat tr.unit th { background: var(--paper); color: var(--ink); text-transform: none; font: 600 13px var(--display); letter-spacing: 0; padding: 8px 10px; }
+.heat td.topic { min-width: 230px; }
+.heat td.topic small { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.4; margin-top: 2px; }
+.seen { display: inline-flex; gap: 2px; margin-right: 6px; vertical-align: middle; }
+.seen i { width: 7px; height: 14px; background: var(--line); border-radius: 2px; }
+.seen i.on { background: var(--accent); }
+.badge { display: inline-block; font: 600 11px var(--mono); padding: 3px 7px; border-radius: 5px; letter-spacing: .03em; white-space: nowrap; }
+.badge.t1 { background: var(--accent); color: var(--accent-ink); }
+.badge.t2 { border: 1px solid var(--accent); color: var(--accent); }
+.badge.t3 { border: 1px dashed var(--muted); color: var(--muted); }
+.dots { font-family: var(--mono); letter-spacing: 2px; color: var(--accent); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--ink-2); align-items: center; }
+.legend i { display: inline-block; width: 26px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
+.lg8 { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.lg15 { background: var(--accent); }
+
+.slot { display: grid; gap: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { background: var(--accent-soft); color: var(--ink); border-radius: 999px; padding: 3px 10px; font-size: 13px; font-weight: 500; }
+.note { border-left: 4px solid var(--warn); background: var(--warn-soft); padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 14px; }
+.note + .note { margin-top: 8px; }
+.ok { color: var(--good); font-weight: 600; }
+.no { color: var(--bad); font-weight: 600; }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font: 600 12px var(--mono); }
+.pill.ok { background: var(--good-soft); color: var(--good); }
+.pill.no { background: var(--bad-soft); color: var(--bad); }
+.pill.run { background: var(--warn-soft); color: var(--warn); }
+
+details { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0; }
+details + details { margin-top: 8px; }
+summary { cursor: pointer; padding: 11px 16px; font: 600 15px var(--display); list-style: none; display: flex; justify-content: space-between; gap: 10px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: '+'; font-family: var(--mono); color: var(--accent); }
+details[open] > summary::after { content: '–'; }
+details > .body { padding: 0 16px 14px; }
+details ol, details ul, .body ol, .body ul { margin: 0; padding-left: 20px; }
+li + li { margin-top: 4px; }
+
+.block { display: grid; gap: 8px; }
+.block header { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.block .num { font: 700 26px var(--display); color: var(--accent); min-width: 28px; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+.check input { margin-top: 4px; accent-color: var(--accent); width: 16px; height: 16px; }
+.check span.done { text-decoration: line-through; color: var(--muted); }
+.progress { height: 8px; background: var(--line-2); border-radius: 99px; overflow: hidden; }
+.progress > i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .25s; }
+
+.lab { display: grid; gap: 14px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+pre { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 0; overflow-x: auto; font-size: 13.5px; line-height: 1.55; white-space: pre; }
+.stage { border: 1px solid var(--line); border-radius: 10px; background: var(--card); overflow: hidden; }
+.stage > h3 { padding: 9px 14px; background: var(--paper); border-bottom: 1px solid var(--line); font-size: 14px; }
+.stage > .in { padding: 10px 14px; display: grid; gap: 8px; }
+.err { background: var(--bad-soft); color: var(--bad); border-radius: 8px; padding: 9px 12px; font-size: 14px; }
+svg.graph { width: 100%; max-width: 760px; height: auto; display: block; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+.g-edge { fill: none; stroke: var(--ink-2); stroke-width: 1.4; }
+.g-node { fill: var(--card); stroke: var(--ink); stroke-width: 1.6; }
+.g-node.active { fill: var(--accent); }
+.g-inner { fill: none; stroke: var(--ink); stroke-width: 1.2; }
+.g-label { font: 500 12px var(--mono); fill: var(--ink); text-anchor: middle; dominant-baseline: central; }
+.g-label.active { fill: var(--accent-ink); }
+.g-el { font: 500 11.5px var(--mono); fill: var(--ink); text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: var(--card); stroke-width: 4px; stroke-linejoin: round; }
+.g-arrow { fill: var(--ink-2); }
+
+.tape { display: flex; gap: 0; overflow-x: auto; padding: 22px 8px 8px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+.cell { width: 38px; min-width: 38px; height: 42px; border: 1.5px solid var(--ink-2); margin-left: -1.5px; display: grid; place-items: center; font: 600 17px var(--mono); position: relative; background: var(--card); }
+.cell.blank { color: var(--line); }
+.cell.head { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); z-index: 1; }
+.cell.head::before { content: '▼'; position: absolute; top: -17px; left: 50%; transform: translateX(-50%); color: var(--accent); font-size: 12px; }
+.statebox { font: 600 15px var(--mono); background: var(--accent-soft); padding: 4px 10px; border-radius: 6px; }
+.ids { max-height: 240px; overflow: auto; font-size: 13px; }
+.ids div { padding: 1px 0; white-space: pre; }
+.ids div.cur { background: var(--accent-soft); }
+.explain { font-size: 13px; color: var(--muted); font-family: var(--mono); min-height: 20px; }
+
+.pairs td { text-align: center; font: 500 13px var(--mono); min-width: 40px; }
+.pairs td.mk { background: var(--bad-soft); color: var(--bad); }
+.pairs td.eq { background: var(--good-soft); color: var(--good); }
+.pairs td.nil { background: var(--paper); }
+.pairs th { text-transform: none; font: 600 13px var(--mono); letter-spacing: 0; }
+
+.qbox { display: grid; gap: 12px; max-width: 760px; }
+.opts { display: grid; gap: 8px; }
+.opt { text-align: left; border: 1.5px solid var(--line); background: var(--card); padding: 10px 14px; border-radius: 8px; font: 400 15px var(--body); cursor: pointer; color: var(--ink); }
+.opt:hover:not(:disabled) { border-color: var(--accent); }
+.opt.right { border-color: var(--good); background: var(--good-soft); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.opt:disabled { cursor: default; opacity: 1; }
+.src { font: 500 12px var(--mono); color: var(--muted); }
+.meter { display: grid; gap: 6px; }
+.meter div.r { display: grid; grid-template-columns: 70px 1fr 50px; gap: 8px; align-items: center; font-size: 13px; }
+.meter .bar { height: 10px; background: var(--line-2); border-radius: 99px; overflow: hidden; }
+.meter .bar i { display: block; height: 100%; background: var(--accent); }
+
+footer.src-note { margin-top: 34px; color: var(--muted); font-size: 13px; }
+@media (max-width: 640px) {
+  .brand span { display: none; }
+  h2 { font-size: 20px; }
+  .cell { width: 34px; min-width: 34px; height: 38px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+</style>
+</head>
+<body>
+<header class="rail"><div class="rail-in"><div class="brand"><b>δ</b> FLA <span>playbook</span></div><nav class="tabs" id="tabs" aria-label="Sections"></nav></div></header>
+<main id="view"></main>
+<script>
+/* FLA engines: finite automata, Mealy/Moore, grammars, PDA, TM, PCP. Pure functions, no DOM. */
+(function (root) {
+'use strict';
+const EPS = 'ε';
+const isEps = t => t === 'ε' || t === 'eps' || t === 'epsilon' || t === 'λ' || t === '~';
+const uniq = a => [...new Set(a)];
+const clone = o => JSON.parse(JSON.stringify(o));
+
+/* ===================== Finite automata ===================== */
+const KEY = '\u0001';
+function parseTargets(str) {
+  str = str.replace(/[{}]/g, ' ').replace(/,/g, ' ').trim();
+  if (!str) return [];
+  return uniq(str.split(/\s+/).filter(t => t && !/^(-|—|∅|phi|φ|none)$/i.test(t)));
+}
+function parseFA(text) {
+  const fa = { start: null, finals: [], trans: {}, states: [], alphabet: [], hasEps: false };
+  const seen = new Set();
+  const addState = s => { if (!seen.has(s)) { seen.add(s); fa.states.push(s); } };
+  for (const raw of text.split(/\n/)) {
+    const line = raw.replace(/#.*$/, '').trim();
+    if (!line) continue;
+    let m;
+    if ((m = line.match(/^start\s*[:=]\s*(.+)$/i))) { fa.start = m[1].trim().replace(/[{}]/g, ''); addState(fa.start); continue; }
+    if ((m = line.match(/^(final|finals|accept|accepting)\s*[:=]\s*(.*)$/i))) { fa.finals = parseTargets(m[2]); fa.finals.forEach(addState); continue; }
+    m = line.match(/^(\S+?)\s*[, ]\s*(\S+)\s*(?:->|→|=)\s*(.*)$/);
+    if (!m) throw new Error('Cannot read: "' + raw.trim() + '". Write transitions like:  p 0 -> q r');
+    const s = m[1];
+    let a = m[2];
+    if (isEps(a)) { a = EPS; fa.hasEps = true; } else if (!fa.alphabet.includes(a)) fa.alphabet.push(a);
+    const t = parseTargets(m[3]);
+    addState(s); t.forEach(addState);
+    const k = s + KEY + a;
+    fa.trans[k] = uniq((fa.trans[k] || []).concat(t));
+  }
+  if (!fa.states.length) throw new Error('Add at least one transition.');
+  if (!fa.start) fa.start = fa.states[0];
+  return fa;
+}
+const delta = (fa, s, a) => fa.trans[s + KEY + a] || [];
+function epsClosure(fa, set) {
+  const out = new Set(set), st = [...set];
+  while (st.length) {
+    const s = st.pop();
+    for (const t of delta(fa, s, EPS)) if (!out.has(t)) { out.add(t); st.push(t); }
+  }
+  return [...out];
+}
+function nfaToDfa(fa) {
+  const idx = s => fa.states.indexOf(s);
+  const norm = arr => uniq(arr).sort((x, y) => idx(x) - idx(y));
+  const nameOf = set => set.length ? '{' + set.join(',') + '}' : '∅';
+  const closures = {};
+  if (fa.hasEps) fa.states.forEach(s => { closures[s] = norm(epsClosure(fa, [s])); });
+  const start = norm(epsClosure(fa, [fa.start]));
+  const seen = new Map([[nameOf(start), start]]);
+  const queue = [start], rows = [];
+  while (queue.length) {
+    const S = queue.shift();
+    for (const a of fa.alphabet) {
+      const move = norm([].concat(...S.map(s => delta(fa, s, a))));
+      const to = norm(epsClosure(fa, move));
+      rows.push({ from: S, sym: a, move, to });
+      const n = nameOf(to);
+      if (!seen.has(n)) { seen.set(n, to); queue.push(to); }
+    }
+  }
+  const states = [...seen.entries()].map(([name, set]) => ({ name, set, final: set.some(s => fa.finals.includes(s)) }));
+  const dfa = { states: states.map(s => s.name), alphabet: fa.alphabet.slice(), start: nameOf(start), finals: states.filter(s => s.final).map(s => s.name), delta: {} };
+  for (const r of rows) { (dfa.delta[nameOf(r.from)] = dfa.delta[nameOf(r.from)] || {})[r.sym] = nameOf(r.to); }
+  return { closures, startSet: start, rows, states, dfa, nameOf };
+}
+function runNFA(fa, w) {
+  let cur = epsClosure(fa, [fa.start]);
+  const trace = [cur.slice()];
+  for (const c of w) {
+    const next = [];
+    for (const s of cur) next.push(...delta(fa, s, c));
+    cur = uniq(epsClosure(fa, next));
+    trace.push(cur.slice());
+  }
+  return { accepted: cur.some(s => fa.finals.includes(s)), trace };
+}
+function faToDfaObj(fa) {
+  const d = { states: fa.states.slice(), alphabet: fa.alphabet.slice(), start: fa.start, finals: fa.finals.slice(), delta: {} };
+  let trap = false;
+  for (const s of fa.states) for (const a of fa.alphabet) {
+    const t = delta(fa, s, a);
+    if (t.length > 1) throw new Error('State ' + s + ' on ' + a + ' has several targets, so this is an NFA. Use the NFA to DFA converter.');
+    (d.delta[s] = d.delta[s] || {})[a] = t.length ? t[0] : null;
+  }
+  return d;
+}
+function completeDfa(d) {
+  d = clone(d);
+  let needs = false;
+  for (const s of d.states) for (const a of d.alphabet) if (!d.delta[s][a]) needs = true;
+  if (needs) {
+    let trap = 'dead'; while (d.states.includes(trap)) trap += "'";
+    d.states.push(trap); d.delta[trap] = {};
+    for (const a of d.alphabet) d.delta[trap][a] = trap;
+    for (const s of d.states) for (const a of d.alphabet) if (!d.delta[s][a]) d.delta[s][a] = trap;
+    d.trap = trap;
+  }
+  return d;
+}
+function runDFA(d, w) {
+  let s = d.start; const path = [s];
+  for (const c of w) {
+    const t = d.delta[s] && d.delta[s][c];
+    if (!t) return { accepted: false, path, stuck: true };
+    s = t; path.push(s);
+  }
+  return { accepted: d.finals.includes(s), path };
+}
+function minimizeDFA(d0) {
+  const d = completeDfa(d0);
+  // reachable
+  const reach = [d.start], seen = new Set(reach);
+  for (let i = 0; i < reach.length; i++) for (const a of d.alphabet) { const t = d.delta[reach[i]][a]; if (!seen.has(t)) { seen.add(t); reach.push(t); } }
+  const R = d.states.filter(s => seen.has(s));
+  const removed = d.states.filter(s => !seen.has(s));
+  const fin = s => d.finals.includes(s);
+  const pk = (p, q) => R.indexOf(p) < R.indexOf(q) ? p + '|' + q : q + '|' + p;
+  const marks = new Map(); // key -> {round, reason}
+  const pairs = [];
+  for (let i = 0; i < R.length; i++) for (let j = i + 1; j < R.length; j++) pairs.push([R[i], R[j]]);
+  let round = 0;
+  for (const [p, q] of pairs) if (fin(p) !== fin(q)) marks.set(pk(p, q), { round: 0, reason: 'one is final, the other is not' });
+  let changed = true;
+  while (changed) {
+    changed = false; round++;
+    const add = [];
+    for (const [p, q] of pairs) {
+      if (marks.has(pk(p, q))) continue;
+      for (const a of d.alphabet) {
+        const x = d.delta[p][a], y = d.delta[q][a];
+        if (x !== y && marks.has(pk(x, y)) && marks.get(pk(x, y)).round < round) { add.push([pk(p, q), { round, reason: 'on ' + a + ' they go to (' + x + ', ' + y + '), already distinguishable' }]); break; }
+      }
+    }
+    for (const [k, v] of add) { marks.set(k, v); changed = true; }
+  }
+  // classes
+  const parent = {}; R.forEach(s => parent[s] = s);
+  const find = s => parent[s] === s ? s : (parent[s] = find(parent[s]));
+  for (const [p, q] of pairs) if (!marks.has(pk(p, q))) parent[find(q)] = find(p);
+  const classes = [];
+  const byRoot = {};
+  for (const s of R) { const r = find(s); if (!byRoot[r]) { byRoot[r] = []; classes.push(byRoot[r]); } byRoot[r].push(s); }
+  const cname = c => c.length === 1 ? c[0] : '{' + c.join(',') + '}';
+  const of = {}; classes.forEach(c => c.forEach(s => of[s] = cname(c)));
+  const min = { states: classes.map(cname), alphabet: d.alphabet.slice(), start: of[d.start], finals: classes.filter(c => fin(c[0])).map(cname), delta: {} };
+  for (const c of classes) { min.delta[cname(c)] = {}; for (const a of d.alphabet) min.delta[cname(c)][a] = of[d.delta[c[0]][a]]; }
+  return { complete: d, trapAdded: d.trap || null, removed, states: R, pairs, marks, rounds: round - 1, classes, min, pk };
+}
+
+/* ===================== Mealy / Moore ===================== */
+function parseMealy(text) {
+  const m = { start: null, states: [], alphabet: [], delta: {} };
+  const add = s => { if (!m.states.includes(s)) m.states.push(s); };
+  for (const raw of text.split(/\n/)) {
+    const line = raw.replace(/#.*$/, '').trim(); if (!line) continue;
+    let r;
+    if ((r = line.match(/^start\s*[:=]\s*(\S+)/i))) { m.start = r[1]; add(m.start); continue; }
+    r = line.match(/^(\S+)\s+(\S+)\s*(?:->|→)\s*(\S+)\s+(\S+)$/);
+    if (!r) throw new Error('Mealy line should look like:  q1 0 -> q3 1   (state input -> next output). Got: ' + raw.trim());
+    add(r[1]); add(r[3]);
+    if (!m.alphabet.includes(r[2])) m.alphabet.push(r[2]);
+    (m.delta[r[1]] = m.delta[r[1]] || {})[r[2]] = [r[3], r[4]];
+  }
+  if (!m.start) m.start = m.states[0];
+  return m;
+}
+function parseMoore(text) {
+  const m = { start: null, states: [], alphabet: [], delta: {}, out: {} };
+  const add = s => { if (!m.states.includes(s)) m.states.push(s); };
+  for (const raw of text.split(/\n/)) {
+    const line = raw.replace(/#.*$/, '').trim(); if (!line) continue;
+    let r;
+    if ((r = line.match(/^start\s*[:=]\s*(\S+)/i))) { m.start = r[1]; add(m.start); continue; }
+    if ((r = line.match(/^(?:out|output|outputs)\s*[:=]\s*(.*)$/i))) {
+      for (const pair of r[1].split(/[\s,]+/).filter(Boolean)) { const kv = pair.split('='); if (kv.length !== 2) throw new Error('Outputs look like  out: q0=0 q1=1'); add(kv[0]); m.out[kv[0]] = kv[1]; }
+      continue;
+    }
+    r = line.match(/^(\S+)\s+(\S+)\s*(?:->|→)\s*(\S+)$/);
+    if (!r) throw new Error('Moore line should look like:  q0 a -> q1.  Outputs go on a line like  out: q0=0 q1=1. Got: ' + raw.trim());
+    add(r[1]); add(r[3]);
+    if (!m.alphabet.includes(r[2])) m.alphabet.push(r[2]);
+    (m.delta[r[1]] = m.delta[r[1]] || {})[r[2]] = r[3];
+  }
+  if (!m.start) m.start = m.states[0];
+  for (const s of m.states) if (m.out[s] === undefined) throw new Error('State ' + s + ' has no output. Add it to the  out:  line.');
+  return m;
+}
+function runMealy(m, w) {
+  let s = m.start; const steps = []; let out = '';
+  for (const c of w) {
+    const t = m.delta[s] && m.delta[s][c];
+    if (!t) return { error: 'No transition from ' + s + ' on ' + c, steps, out };
+    steps.push({ from: s, sym: c, to: t[0], out: t[1] }); out += t[1]; s = t[0];
+  }
+  return { steps, out, end: s };
+}
+function runMoore(m, w) {
+  let s = m.start; const steps = []; let out = m.out[s];
+  for (const c of w) {
+    const t = m.delta[s] && m.delta[s][c];
+    if (!t) return { error: 'No transition from ' + s + ' on ' + c, steps, out };
+    steps.push({ from: s, sym: c, to: t, out: m.out[t] }); out += m.out[t]; s = t;
+  }
+  return { steps, out, end: s };
+}
+function mooreToMealy(m) {
+  const me = { start: m.start, states: m.states.slice(), alphabet: m.alphabet.slice(), delta: {} };
+  for (const s of m.states) for (const a of m.alphabet) { const t = m.delta[s] && m.delta[s][a]; if (t) (me.delta[s] = me.delta[s] || {})[a] = [t, m.out[t]]; }
+  return me;
+}
+function mealyToMoore(me, initOut) {
+  const incoming = {}; me.states.forEach(s => incoming[s] = []);
+  for (const s of me.states) for (const a of me.alphabet) { const t = me.delta[s] && me.delta[s][a]; if (t && !incoming[t[0]].includes(t[1])) incoming[t[0]].push(t[1]); }
+  const name = (q, o) => q + '/' + o;
+  const startOut = initOut;
+  const m = { start: name(me.start, startOut), states: [], alphabet: me.alphabet.slice(), delta: {}, out: {} };
+  const todo = [[me.start, startOut]], seen = new Set([name(me.start, startOut)]);
+  while (todo.length) {
+    const [q, o] = todo.shift(); const n = name(q, o);
+    m.states.push(n); m.out[n] = o;
+    for (const a of me.alphabet) {
+      const t = me.delta[q] && me.delta[q][a]; if (!t) continue;
+      const tn = name(t[0], t[1]);
+      (m.delta[n] = m.delta[n] || {})[a] = tn;
+      if (!seen.has(tn)) { seen.add(tn); todo.push([t[0], t[1]]); }
+    }
+  }
+  return { moore: m, incoming };
+}
+
+/* ===================== Grammars ===================== */
+const isNT = t => /^[A-Z]/.test(t);
+function tokRHS(str, word) {
+  const s = str.trim();
+  if (s === '' || isEps(s)) return [];
+  if (word || /\s/.test(s)) return s.split(/\s+/).filter(t => !isEps(t));
+  return s.match(/[A-Z]'*|./gu) || [];
+}
+function fmtRHS(r) { return r.length ? (r.every(t => t.length === 1) ? r.join('') : r.join(' ')) : 'ε'; }
+function parseGrammar(text) {
+  const g = { start: null, nts: [], P: {} };
+  let word = false;
+  for (const raw of text.split(/\n/)) {
+    const mm = raw.replace(/#.*$/, '').match(/(?:->|→|::=|:=)\s*(.*)$/);
+    if (mm) for (const alt of mm[1].split('|')) if (/\S\s+\S/.test(alt.trim())) word = true;
+  }
+  g.word = word;
+  for (const raw of text.split(/\n/)) {
+    const line = raw.replace(/#.*$/, '').trim(); if (!line) continue;
+    const m = line.match(/^(\S+?)\s*(?:->|→|::=|:=)\s*(.*)$/);
+    if (!m) throw new Error('Cannot read: "' + raw.trim() + '". Write rules like:  S -> aSb | ε');
+    const A = m[1];
+    if (!isNT(A)) throw new Error('Left side "' + A + '" must start with a capital letter.');
+    if (!g.start) g.start = A;
+    if (!g.P[A]) { g.P[A] = []; g.nts.push(A); }
+    for (const alt of m[2].split('|')) {
+      const r = tokRHS(alt, word);
+      if (!g.P[A].some(x => x.join('\u0001') === r.join('\u0001'))) g.P[A].push(r);
+    }
+  }
+  if (!g.start) throw new Error('Add at least one rule.');
+  // nonterminals appearing only on right side
+  for (const A of g.nts.slice()) for (const r of g.P[A]) for (const t of r) if (isNT(t) && !g.P[t]) { g.P[t] = []; g.nts.push(t); }
+  return g;
+}
+function grammarText(g) {
+  return g.nts.filter(A => g.P[A] && g.P[A].length).map(A => A + ' → ' + g.P[A].map(fmtRHS).join(' | ')).join('\n');
+}
+function nullableSet(g) {
+  const N = new Set(); let ch = true;
+  while (ch) { ch = false; for (const A of g.nts) if (!N.has(A) && g.P[A].some(r => r.every(t => N.has(t)))) { N.add(A); ch = true; } }
+  return N;
+}
+function dedupeRules(rs) { const seen = new Set(); return rs.filter(r => { const k = r.join('\u0001'); if (seen.has(k)) return false; seen.add(k); return true; }); }
+function freshName(g, base) {
+  let n = base; while (g.nts.includes(n)) n += "'"; return n;
+}
+function removeNull(g0, keepStartEps) {
+  const g = clone(g0); const N = nullableSet(g);
+  const P = {};
+  for (const A of g.nts) {
+    let out = [];
+    for (const r of g.P[A]) {
+      if (!r.length) continue;
+      const pos = r.map((t, i) => N.has(t) ? i : -1).filter(i => i >= 0);
+      for (let mask = 0; mask < (1 << pos.length); mask++) {
+        const drop = new Set(); pos.forEach((p, k) => { if (mask & (1 << k)) drop.add(p); });
+        const nr = r.filter((t, i) => !drop.has(i));
+        if (nr.length) out.push(nr);
+      }
+    }
+    P[A] = dedupeRules(out);
+  }
+  g.P = P;
+  const startNullable = N.has(g.start);
+  if (keepStartEps && startNullable) {
+    const used = g.nts.some(A => g.P[A].some(r => r.includes(g.start)));
+    if (used) {
+      const S0 = freshName(g, g.start + '0'); g.nts.unshift(S0); g.P[S0] = [[g.start], []]; g.start = S0;
+    } else g.P[g.start].push([]);
+  }
+  return { g, nullable: [...N], startNullable };
+}
+function removeUnit(g0) {
+  const g = clone(g0); const pairs = [];
+  const P = {};
+  for (const A of g.nts) {
+    const U = [A]; for (let i = 0; i < U.length; i++) for (const r of g.P[U[i]]) if (r.length === 1 && isNT(r[0]) && !U.includes(r[0])) U.push(r[0]);
+    U.forEach(B => { if (B !== A) pairs.push([A, B]); });
+    let out = [];
+    for (const B of U) for (const r of g.P[B]) if (!(r.length === 1 && isNT(r[0]))) out.push(r);
+    P[A] = dedupeRules(out);
+  }
+  g.P = P;
+  return { g, pairs };
+}
+function removeUseless(g0) {
+  const g = clone(g0);
+  const gen = new Set(); let ch = true;
+  while (ch) { ch = false; for (const A of g.nts) if (!gen.has(A) && g.P[A].some(r => r.every(t => !isNT(t) || gen.has(t)))) { gen.add(A); ch = true; } }
+  const nonGen = g.nts.filter(A => !gen.has(A));
+  const P1 = {};
+  for (const A of g.nts) if (gen.has(A)) P1[A] = g.P[A].filter(r => r.every(t => !isNT(t) || gen.has(t)));
+  const reach = new Set(gen.has(g.start) ? [g.start] : []); const st = [...reach];
+  while (st.length) { const A = st.pop(); for (const r of P1[A]) for (const t of r) if (isNT(t) && !reach.has(t)) { reach.add(t); st.push(t); } }
+  const unreach = g.nts.filter(A => gen.has(A) && !reach.has(A));
+  g.nts = g.nts.filter(A => reach.has(A)); g.P = {}; g.nts.forEach(A => g.P[A] = P1[A]);
+  return { g, nonGenerating: nonGen, unreachable: unreach };
+}
+function simplify(g0, keepStartEps = true) {
+  const log = [];
+  const a = removeNull(g0, keepStartEps);
+  log.push({ title: 'Step 1: remove ε-productions', note: 'Nullable variables: ' + (a.nullable.length ? a.nullable.join(', ') : 'none'), g: a.g });
+  const b = removeUnit(a.g);
+  log.push({ title: 'Step 2: remove unit productions', note: b.pairs.length ? 'Unit pairs: ' + b.pairs.map(p => '(' + p[0] + ',' + p[1] + ')').join(' ') : 'No unit productions.', g: b.g });
+  const c = removeUseless(b.g);
+  log.push({ title: 'Step 3: remove useless symbols', note: 'Non-generating: ' + (c.nonGenerating.join(', ') || 'none') + '. Unreachable: ' + (c.unreachable.join(', ') || 'none') + '.', g: c.g });
+  return { g: c.g, log, startNullable: a.startNullable };
+}
+function toCNF(g0) {
+  const g = clone(g0); const P = {}; const added = [];
+  const tv = {}; let dcount = 0;
+  const gnew = () => ({ nts: g.nts.concat(Object.values(tv), added) });
+  const exists = n => g.nts.includes(n) || added.includes(n);
+  const fresh = base => { let n = base; while (exists(n)) n += "'"; added.push(n); return n; };
+  const termVar = t => { if (!tv[t]) { tv[t] = fresh('C' + t); P[tv[t]] = [[t]]; } return tv[t]; };
+  for (const A of g.nts) P[A] = [];
+  for (const A of g.nts) {
+    for (const r of g.P[A]) {
+      if (r.length <= 1) { P[A].push(r); continue; }
+      let rr = r.map(t => isNT(t) ? t : termVar(t));
+      let head = A;
+      while (rr.length > 2) {
+        const D = fresh('D' + (++dcount));
+        P[head].push([rr[0], D]); P[D] = [];
+        head = D; rr = rr.slice(1);
+      }
+      P[head].push(rr);
+    }
+    P[A] = dedupeRules(P[A]);
+  }
+  const out = { start: g.start, nts: g.nts.concat(added), P };
+  for (const A of out.nts) P[A] = dedupeRules(P[A] || []);
+  return out;
+}
+function toGNF(g0, opts = {}) {
+  const log = [];
+  const g = clone(g0);
+  const order = g.nts.slice();
+  const P = {}; order.forEach(A => P[A] = g.P[A].filter(r => r.length).map(r => r.slice()));
+  const Zs = [];
+  const exists = n => order.includes(n) || Zs.includes(n) || Object.keys(P).includes(n);
+  const fresh = base => { let n = base; while (exists(n)) n += "'"; return n; };
+  const snapshot = (title, note) => { const gg = { start: g.start, nts: Object.keys(P), P: clone(P) }; log.push({ title, note, g: gg }); };
+  snapshot('Start', 'Variables are ordered ' + order.map((A, i) => A + ' = A' + (i + 1)).join(', ') + '. Goal: every rule starts with a terminal.');
+  for (let i = 0; i < order.length; i++) {
+    const Ai = order[i];
+    let guard = 0, changed = true;
+    while (changed && guard++ < 50) {
+      changed = false; const out = [];
+      for (const rhs of P[Ai]) {
+        const j = order.indexOf(rhs[0]);
+        if (j >= 0 && j < i) { for (const beta of P[rhs[0]]) out.push(beta.concat(rhs.slice(1))); changed = true; } else out.push(rhs);
+      }
+      P[Ai] = dedupeRules(out);
+    }
+    const rec = P[Ai].filter(r => r[0] === Ai), non = P[Ai].filter(r => r[0] !== Ai);
+    if (rec.length) {
+      const Z = fresh('Z' + (i + 1)); Zs.push(Z);
+      const nA = []; for (const b of non) { nA.push(b); nA.push(b.concat([Z])); }
+      const zp = []; for (const a of rec) { const al = a.slice(1); zp.push(al); zp.push(al.concat([Z])); }
+      P[Ai] = dedupeRules(nA); P[Z] = dedupeRules(zp);
+      snapshot('Pass A' + (i + 1) + ' (' + Ai + ')', 'Removed left recursion on ' + Ai + ' by adding ' + Z + '.');
+    } else snapshot('Pass A' + (i + 1) + ' (' + Ai + ')', 'Substituted earlier variables at the front of ' + Ai + '. No left recursion.');
+  }
+  // back substitution until all rules start with terminal
+  const all = () => Object.keys(P);
+  const startsTerm = X => P[X].every(r => !isNT(r[0]));
+  let guard = 0;
+  while (all().some(X => !startsTerm(X)) && guard++ < 200) {
+    let progressed = false;
+    for (const X of all()) {
+      if (startsTerm(X)) continue;
+      const deps = uniq(P[X].filter(r => isNT(r[0])).map(r => r[0]));
+      if (deps.every(B => B !== X && startsTerm(B))) {
+        const out = [];
+        for (const r of P[X]) { if (isNT(r[0])) for (const b of P[r[0]]) out.push(b.concat(r.slice(1))); else out.push(r); }
+        P[X] = dedupeRules(out); progressed = true;
+      }
+    }
+    if (!progressed) throw new Error('Could not finish back-substitution (the grammar may have a cycle such as A → A).');
+  }
+  snapshot('Back-substitution', 'Substituted from the last variable upward until every rule begins with a terminal.');
+  // terminals after the first position
+  const tv = {}; let did = false;
+  for (const X of all()) {
+    P[X] = dedupeRules(P[X].map(r => r.map((t, i) => {
+      if (i === 0 || isNT(t)) return t;
+      did = true; if (!tv[t]) { tv[t] = fresh('C' + t); }
+      return tv[t];
+    })));
+  }
+  for (const [t, v] of Object.entries(tv)) P[v] = [[t]];
+  if (did) snapshot('Terminals inside rules', 'Replaced non-leading terminals by variables: ' + Object.entries(tv).map(([t, v]) => v + ' → ' + t).join(', ') + '.');
+  const res = { start: g.start, nts: Object.keys(P), P };
+  return { g: res, log };
+}
+/* membership */
+function cykAccepts(g0, w) { return cnfAccepts(toCNF(simplify(g0, true).g), w); }
+function cnfAccepts(c, w) {
+  const n = w.length;
+  if (n === 0) return c.P[c.start] && c.P[c.start].some(r => r.length === 0);
+  const T = Array.from({ length: n }, () => Array.from({ length: n }, () => new Set()));
+  for (let i = 0; i < n; i++) for (const A of c.nts) if (c.P[A].some(r => r.length === 1 && r[0] === w[i])) T[i][i].add(A);
+  for (let len = 2; len <= n; len++) for (let i = 0; i + len <= n; i++) { const j = i + len - 1;
+    for (let k = i; k < j; k++) for (const A of c.nts) for (const r of c.P[A]) if (r.length === 2 && T[i][k].has(r[0]) && T[k + 1][j].has(r[1])) T[i][j].add(A); }
+  return T[0][n - 1].has(c.start);
+}
+function gnfAccepts(g, w) { // every rule starts with terminal -> top-down recursion terminates
+  const memo = new Map();
+  function parse(syms, i) { // returns true if syms derive w[i..]
+    const key = syms.join('\u0001') + '@' + i;
+    if (memo.has(key)) return memo.get(key);
+    let res = false;
+    if (!syms.length) res = i === w.length;
+    else if (i >= w.length) res = false;
+    else if (!isNT(syms[0])) res = syms[0] === w[i] && parse(syms.slice(1), i + 1);
+    else for (const r of g.P[syms[0]]) { if (r.length && r[0] === w[i] && parse(r.slice(1).concat(syms.slice(1)), i + 1)) { res = true; break; } }
+    memo.set(key, res); return res;
+  }
+  return parse([g.start], 0);
+}
+function enumLanguage(g, maxLen, extra = 4, cap = 300000) {
+  const out = new Set(); const seen = new Set(); const q = [[g.start]]; let n = 0;
+  while (q.length && n++ < cap) {
+    const f = q.shift(); const k = f.join('\u0001'); if (seen.has(k)) continue; seen.add(k);
+    const i = f.findIndex(isNT);
+    if (i < 0) { if (f.length <= maxLen) out.add(f.join('')); continue; }
+    if (f.filter(t => !isNT(t)).length > maxLen) continue;
+    if (f.length > maxLen + extra) continue;
+    for (const r of g.P[f[i]]) q.push(f.slice(0, i).concat(r, f.slice(i + 1)));
+  }
+  return out;
+}
+/* leftmost derivation search */
+function derive(g, w, opts = {}) {
+  const wt = tokInput(w); const cap = opts.cap || 200000; const extra = opts.extra || 6;
+  const start = { f: [g.start], parent: null, rule: null };
+  const q = [start]; const seen = new Set([g.start]); let n = 0;
+  while (q.length && n++ < cap) {
+    const node = q.shift(); const f = node.f;
+    const i = f.findIndex(isNT);
+    if (i < 0) {
+      if (f.length === wt.length && f.every((t, k) => t === wt[k])) {
+        const path = []; for (let x = node; x; x = x.parent) path.unshift(x);
+        return { forms: path.map(p => p.f), rules: path.slice(1).map(p => p.rule) };
+      }
+      continue;
+    }
+    for (let k = 0; k < i; k++) if (f[k] !== wt[k]) { n--; break; }
+    let bad = false; for (let k = 0; k < i; k++) if (k >= wt.length || f[k] !== wt[k]) { bad = true; break; }
+    if (bad) continue;
+    if (f.length > wt.length + extra) continue;
+    for (const r of g.P[f[i]]) {
+      const nf = f.slice(0, i).concat(r, f.slice(i + 1)); const key = nf.join('\u0001');
+      if (seen.has(key)) continue; seen.add(key);
+      q.push({ f: nf, parent: node, rule: { lhs: f[i], rhs: r } });
+    }
+  }
+  return null;
+}
+function tokInput(w) { w = w.trim(); if (!w || isEps(w)) return []; return /\s/.test(w) ? w.split(/\s+/) : [...w]; }
+function buildTree(g, rules, startSym) {
+  let k = 0;
+  function expand(sym) {
+    if (!isNT(sym)) return { sym, kids: [] };
+    const r = rules[k++]; return { sym, kids: r.rhs.length ? r.rhs.map(expand) : [{ sym: 'ε', kids: [] }] };
+  }
+  return expand(startSym);
+}
+function treeText(t, prefix = '', last = true, root = true) {
+  let s = root ? t.sym + '\n' : prefix + (last ? '└─ ' : '├─ ') + t.sym + '\n';
+  const np = root ? '' : prefix + (last ? '   ' : '│  ');
+  t.kids.forEach((c, i) => { s += treeText(c, np, i === t.kids.length - 1, false); });
+  return s;
+}
+function derivationsOf(g, w, limit, nodeCap) {
+  const n = w.length, depthMax = 2 * n + 4, lenMax = n + 3; const found = []; let nodes = 0;
+  function rec(f, path) {
+    if (found.length >= limit || nodes++ > nodeCap) return;
+    const i = f.findIndex(isNT);
+    if (i < 0) { if (f.length === n && f.every((t, k) => t === w[k])) found.push(path.slice()); return; }
+    for (let k = 0; k < i; k++) if (k >= n || f[k] !== w[k]) return;
+    if (f.length > lenMax || path.length > depthMax) return;
+    if (f.filter(t => !isNT(t)).length > n) return;
+    for (const r of g.P[f[i]]) {
+      const nf = f.slice(0, i).concat(r, f.slice(i + 1)); const key = nf.join('\u0001');
+      if (path.some(p => p.join('\u0001') === key)) continue; // skip ε-cycles
+      path.push(nf); rec(nf, path); path.pop();
+    }
+  }
+  rec([g.start], [[g.start]]);
+  return found;
+}
+function findAmbiguity(g, maxLen = 6, opts = {}) {
+  const terms = uniq([].concat(...g.nts.map(A => [].concat(...g.P[A].map(r => r.filter(t => !isNT(t)))))));
+  const deadline = Date.now() + (opts.ms || 3000);
+  let level = [[]];
+  for (let len = 0; len <= maxLen; len++) {
+    for (const w of level) {
+      if (Date.now() > deadline) return { timedOut: true };
+      if (!cykAccepts(g, w)) continue;
+      const ds = derivationsOf(g, w, 2, 40000);
+      if (ds.length >= 2) return { string: w.join(g.word ? ' ' : '') || 'ε', d1: ds[0], d2: ds[1] };
+    }
+    if (len < maxLen) level = [].concat(...level.map(w => terms.map(t => w.concat([t]))));
+  }
+  return null;
+}
+
+/* ===================== PDA ===================== */
+function tokStack(s) {
+  s = s.trim(); if (s === '' || isEps(s)) return [];
+  if (/\s/.test(s)) return s.split(/\s+/).filter(t => !isEps(t));
+  return s.match(/[A-Z][0-9]*'*|./gu) || [];
+}
+function parsePDA(text) {
+  const p = { start: null, Z0: 'Z0', finals: [], accept: 'final', trans: [] };
+  for (const raw of text.split(/\n/)) {
+    const line = raw.replace(/#.*$/, '').trim(); if (!line) continue;
+    let m;
+    if ((m = line.match(/^start\s*[:=]\s*(\S+)/i))) { p.start = m[1]; continue; }
+    if ((m = line.match(/^(?:stack|z0|bottom)\s*[:=]\s*(\S+)/i))) { p.Z0 = m[1]; continue; }
+    if ((m = line.match(/^(?:final|finals)\s*[:=]\s*(.*)$/i))) { p.finals = parseTargets(m[1]); p.accept = 'final'; continue; }
+    if ((m = line.match(/^accept\s*[:=]\s*(empty|final)/i))) { p.accept = m[1].toLowerCase(); continue; }
+    m = line.match(/^(\S+)\s+(\S+)\s+(\S+)\s*(?:->|→)\s*(.*)$/);
+    if (!m) throw new Error('PDA line should look like:  q0 a Z0 -> q0 aZ0   (state input top -> next push). Got: ' + raw.trim());
+    for (const alt of m[4].split('|')) {
+      const mm = alt.trim().match(/^(\S+)(?:\s+(.*))?$/);
+      if (!mm) throw new Error('Missing next state in: ' + raw.trim());
+      p.trans.push({ q: m[1], a: isEps(m[2]) ? EPS : m[2], X: m[3], p: mm[1], push: mm[2] ? tokStack(mm[2]) : [] });
+      if (!p.start) p.start = m[1];
+    }
+  }
+  if (!p.start) throw new Error('Add at least one transition.');
+  return p;
+}
+function pdaText(p) {
+  const lines = ['start: ' + p.start, 'stack: ' + p.Z0, p.accept === 'final' ? 'final: ' + p.finals.join(' ') : 'accept: empty'];
+  for (const t of p.trans) lines.push(t.q + ' ' + t.a + ' ' + t.X + ' -> ' + t.p + ' ' + fmtRHS(t.push));
+  return lines.join('\n');
+}
+function simulatePDA(p, w, opts = {}) {
+  const inp = tokInput(w); const n = inp.length;
+  const cap = opts.cap || 150000, scap = opts.stackCap || (4 * n + 12);
+  const root = { q: p.start, i: 0, st: [p.Z0], parent: null, via: null };
+  const q = [root]; const seen = new Set(); let explored = 0;
+  const byState = {}; p.trans.forEach(t => (byState[t.q] = byState[t.q] || []).push(t));
+  while (q.length && explored < cap) {
+    const c = q.shift(); const k = c.q + '|' + c.i + '|' + c.st.join(' ');
+    if (seen.has(k)) continue; seen.add(k); explored++;
+    const ok = c.i === n && (p.accept === 'final' ? p.finals.includes(c.q) : c.st.length === 0);
+    if (ok) { const path = []; for (let x = c; x; x = x.parent) path.unshift(x); return { accepted: true, path, explored }; }
+    if (!c.st.length) continue;
+    for (const t of byState[c.q] || []) {
+      if (t.X !== c.st[0]) continue;
+      let ni = c.i;
+      if (t.a !== EPS) { if (c.i >= n || inp[c.i] !== t.a) continue; ni = c.i + 1; }
+      const ns = t.push.concat(c.st.slice(1)); if (ns.length > scap) continue;
+      q.push({ q: t.p, i: ni, st: ns, parent: c, via: t });
+    }
+  }
+  return { accepted: false, explored, truncated: explored >= cap, input: inp };
+}
+function cfgToPDA(g) {
+  const p = { start: 'q0', Z0: 'Z0', finals: ['qf'], accept: 'final', trans: [] };
+  p.trans.push({ q: 'q0', a: EPS, X: 'Z0', p: 'q1', push: [g.start, 'Z0'] });
+  for (const A of g.nts) for (const r of g.P[A]) p.trans.push({ q: 'q1', a: EPS, X: A, p: 'q1', push: r });
+  const terms = uniq([].concat(...g.nts.map(A => [].concat(...g.P[A].map(r => r.filter(t => !isNT(t)))))));
+  for (const t of terms) p.trans.push({ q: 'q1', a: t, X: t, p: 'q1', push: [] });
+  p.trans.push({ q: 'q1', a: EPS, X: 'Z0', p: 'qf', push: ['Z0'] });
+  return p;
+}
+
+/* ===================== Turing machines ===================== */
+function parseTM(text) {
+  const tm = { blank: 'B', start: null, accept: [], trans: {}, states: [] };
+  const add = s => { if (!tm.states.includes(s)) tm.states.push(s); };
+  for (const raw of text.split(/\n/)) {
+    const line = raw.replace(/#.*$/, '').trim(); if (!line) continue;
+    let m;
+    if ((m = line.match(/^start\s*[:=]\s*(\S+)/i))) { tm.start = m[1]; add(m[1]); continue; }
+    if ((m = line.match(/^accept\s*[:=]\s*(.*)$/i))) { tm.accept = parseTargets(m[1]); tm.accept.forEach(add); continue; }
+    if ((m = line.match(/^blank\s*[:=]\s*(\S+)/i))) { tm.blank = m[1]; continue; }
+    m = line.match(/^(\S+)\s+(\S+)\s*(?:->|→)\s*(\S+)\s+(\S+)\s+([LRSlrs])$/);
+    if (!m) throw new Error('TM line should look like:  q0 a -> q1 X R   (state read -> next write move). Got: ' + raw.trim());
+    add(m[1]); add(m[3]);
+    tm.trans[m[1] + KEY + m[2]] = [m[3], m[4], m[5].toUpperCase()];
+    if (!tm.start) tm.start = m[1];
+  }
+  if (!tm.start) throw new Error('Add at least one transition.');
+  return tm;
+}
+function runTM(tm, input, maxSteps = 5000) {
+  const tape = input.length ? [...input] : [tm.blank]; let head = 0, state = tm.start;
+  const snap = (note) => ({ state, tape: tape.slice(), head, note });
+  const configs = [snap('start')]; let status = 'running', steps = 0;
+  while (steps < maxSteps) {
+    if (tm.accept.includes(state)) { status = 'accepted'; break; }
+    const sym = tape[head] === undefined ? tm.blank : tape[head];
+    const t = tm.trans[state + KEY + sym];
+    if (!t) { status = 'rejected'; break; }
+    tape[head] = t[1];
+    if (t[2] === 'R') head++; else if (t[2] === 'L') head--;
+    if (head < 0) { tape.unshift(tm.blank); head = 0; }
+    if (head >= tape.length) tape.push(tm.blank);
+    const note = 'δ(' + state + ', ' + sym + ') = (' + t[0] + ', ' + t[1] + ', ' + t[2] + ')';
+    state = t[0]; steps++;
+    configs.push(snap(note));
+  }
+  if (status === 'running') status = 'limit';
+  const out = tape.join('').replace(new RegExp(tm.blank, 'g'), ' ').trim().replace(/ /g, tm.blank);
+  return { status, steps, configs, output: tape.filter(c => c !== tm.blank).join('') };
+}
+function idString(c, blank) {
+  const t = c.tape.slice();
+  while (t.length && t[0] === blank && c.head > 0) { t.shift(); c = { ...c, head: c.head - 1 }; }
+  while (t.length - 1 > c.head && t[t.length - 1] === blank) t.pop();
+  return t.slice(0, c.head).join('') + '[' + c.state + ']' + t.slice(c.head).join('');
+}
+
+/* ===================== PCP ===================== */
+function solvePCP(tiles, opts = {}) {
+  const mpcp = !!opts.mpcp, maxOver = opts.maxOver || 28, cap = opts.cap || 250000, maxDepth = opts.maxDepth || 60;
+  const q = []; const seen = new Set(); let explored = 0;
+  const apply = (top, bot, i) => { const T = top + tiles[i][0], B = bot + tiles[i][1]; if (T.startsWith(B) || B.startsWith(T)) return [T, B]; return null; };
+  const norm = (T, B) => T.length >= B.length ? ['t', T.slice(B.length)] : ['b', B.slice(T.length)];
+  const starts = mpcp ? [0] : tiles.map((_, i) => i);
+  for (const i of starts) { const r = apply('', '', i); if (r) { const [s, o] = norm(r[0], r[1]); q.push({ side: s, over: o, seq: [i], T: r[0], B: r[1] }); } }
+  while (q.length && explored++ < cap) {
+    const c = q.shift();
+    if (c.over === '' ) return { found: true, seq: c.seq.map(i => i + 1), top: c.T, bottom: c.B, explored };
+    if (c.seq.length >= maxDepth) continue;
+    const key = c.side + ':' + c.over; if (seen.has(key)) continue; seen.add(key);
+    for (let i = 0; i < tiles.length; i++) {
+      const r = apply(c.T, c.B, i); if (!r) continue;
+      const [s, o] = norm(r[0], r[1]); if (o.length > maxOver) continue;
+      q.push({ side: s, over: o, seq: c.seq.concat([i]), T: r[0], B: r[1] });
+    }
+  }
+  return { found: false, explored, exhausted: !q.length };
+}
+
+const api = { EPS, parseFA, delta, epsClosure, nfaToDfa, runNFA, faToDfaObj, completeDfa, runDFA, minimizeDFA,
+  parseMealy, parseMoore, runMealy, runMoore, mooreToMealy, mealyToMoore,
+  isNT, tokRHS, fmtRHS, parseGrammar, grammarText, nullableSet, removeNull, removeUnit, removeUseless, simplify, toCNF, toGNF,
+  cykAccepts, cnfAccepts, gnfAccepts, enumLanguage, derive, buildTree, treeText, findAmbiguity, tokInput,
+  parsePDA, pdaText, simulatePDA, cfgToPDA, parseTM, runTM, idString, solvePCP };
+if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.FLA = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* Presets taken from the past papers. Shared by the page and the tests. */
+(function (root) {
+const P = {};
+
+P.nfa = [
+  { id: 'n24', label: 'Nov 2024 · Jul 2025 P2: second-last symbol is 1', text: `# NFA: second symbol from the end is 1   (Nov 2024 Q21a, Jul 2025 P2 Q21b)
+start: q0
+final: q2
+q0 0 -> q0
+q0 1 -> q0 q1
+q1 0 -> q2
+q1 1 -> q2`, tests: ['100010', '100000', '11', '0110'] },
+  { id: 'm26', label: 'May 2026 Q21b: NFA P,Q,R,S', text: `# May 2026 Q21b
+start: P
+final: Q S
+P 0 -> Q S
+P 1 -> Q
+Q 0 -> R
+Q 1 -> Q R
+R 0 -> S
+R 1 -> P
+S 0 ->
+S 1 -> P`, tests: ['01', '0010', '1'] },
+  { id: 'j1', label: 'Jul 2025 P1 Q21b: NFA p,q,r,s', text: `# Jul 2025 P1 Q21b
+start: p
+final: s
+p 0 -> p q
+p 1 -> p
+q 0 -> r
+q 1 -> r
+r 0 -> s
+r 1 ->
+s 0 -> s
+s 1 -> s`, tests: ['000', '0100', '111'] },
+  { id: 'j1e', label: 'Jul 2025 P1 Q21a: ε-NFA p,q,r', text: `# Jul 2025 P1 Q21a-i  (ε-NFA, columns ε a b c)
+start: p
+final: r
+p ε -> q r
+p a ->
+p b -> q
+p c -> r
+q ε ->
+q a -> p
+q b -> r
+q c -> p q
+r ε ->
+r a ->
+r b ->
+r c ->`, tests: ['b', 'ac', 'bb', 'a'] }
+];
+
+P.dfa = [
+  { id: 'm25', label: 'May 2025 Q26: minimize this FA', text: `# May 2025 Q26 part 2
+start: q0
+final: q1 q2 q5
+q0 a -> q1
+q0 b -> q2
+q1 a -> q3
+q1 b -> q4
+q2 a -> q4
+q2 b -> q3
+q3 a -> q5
+q3 b -> q5
+q4 a -> q5
+q4 b -> q5
+q5 a -> q5
+q5 b -> q5`, tests: ['a', 'ab', 'aab', ''] },
+  { id: 'xxy', label: 'May 2025 Q21a: strings with no substring xxy', text: `# no substring "xxy" over {x,y}
+start: A
+final: A B C
+A x -> B
+A y -> A
+B x -> C
+B y -> A
+C x -> C
+C y -> D
+D x -> D
+D y -> D`, tests: ['xyxy', 'xxy', 'yxxx', 'xxxy'] },
+  { id: 'ends01', label: 'Example: ends with ab (Nov 2025 Q4 DFA)', text: `# Nov 2025 Q4: M = ({q0,q1,q2},{a,b},δ,q0,{q2})
+start: q0
+final: q2
+q0 a -> q1
+q0 b -> q0
+q1 a -> q1
+q1 b -> q2
+q2 a -> q1
+q2 b -> q0`, tests: ['aab', 'abb', 'ababb', 'ab'] }
+];
+
+P.mealy = [
+  { id: 'j1', label: 'Jul 2025 P1 Q4: Mealy, input 0010', text: `# Jul 2025 P1 Q4
+start: q1
+q1 0 -> q3 0
+q1 1 -> q2 0
+q2 0 -> q1 1
+q2 1 -> q4 0
+q3 0 -> q2 1
+q3 1 -> q1 1
+q4 0 -> q4 1
+q4 1 -> q3 0`, test: '0010' },
+  { id: 'm26', label: 'May 2026 Q21a: Mealy to convert', text: `# May 2026 Q21a  (a/1 b/0 style, edges read from the figure)
+start: q1
+q1 b -> q2 0
+q1 a -> q4 1
+q2 a -> q4 1
+q2 b -> q2 1
+q4 a -> q3 0
+q4 b -> q4 1
+q3 a -> q1 1
+q3 b -> q1 1`, test: 'abab' }
+];
+P.moore = [
+  { id: 'j1', label: 'Jul 2025 P1 Q21b-ii: Moore, runs aabab and ababb', text: `# Jul 2025 P1 Q21b-ii
+start: q0
+out: q0=0 q1=0 q2=1
+q0 a -> q1
+q0 b -> q0
+q1 a -> q1
+q1 b -> q2
+q2 a -> q1
+q2 b -> q0`, test: 'aabab' },
+  { id: 'n24', label: 'Nov 2024 Q21b: print a for 10, b for 11, else c', text: `# Moore machine: last two bits 10 -> a, 11 -> b, otherwise c
+start: s
+out: s=c z=c o=c a=a b=b
+s 0 -> z
+s 1 -> o
+z 0 -> z
+z 1 -> o
+o 0 -> a
+o 1 -> b
+a 0 -> z
+a 1 -> o
+b 0 -> a
+b 1 -> b`, test: '1011010' }
+];
+
+P.grammar = [
+  { id: 'j1g', label: 'Jul 2025 P1 Q22b-i as I read it: S→AB, A→BSB|BB|b, B→aAb|a (GNF)', text: `S -> AB\nA -> BSB | BB | b\nB -> aAb | a`, alphabet: 'ab' },
+  { id: 'm25', label: 'May 2025 Q22b: S→AA|a, A→SS|b  (to GNF)', text: `S -> AA | a\nA -> SS | b`, alphabet: 'ab' },
+  { id: 'm26', label: 'May 2026 Q26: to GNF', text: `S -> aA | bB\nB -> bB | ε\nA -> aA | ε`, alphabet: 'ab' },
+  { id: 'j2', label: 'Jul 2025 P2 Q22b: to GNF', text: `S -> XB | AA\nA -> a | SA\nB -> b\nX -> a`, alphabet: 'ab' },
+  { id: 'j1', label: 'Jul 2025 P1 Q27: S→ABC, B and C nullable (CNF)', text: `S -> ABC\nA -> BC | a\nB -> bAC | ε\nC -> cAB | ε`, alphabet: 'abc' },
+  { id: 'm26c', label: 'May 2026 Q22a: to CNF', text: `S -> aAa | bBb | ε\nA -> C | a\nB -> C | b\nC -> CDE | ε\nD -> A | B | ab`, alphabet: 'abE' },
+  { id: 'j2c', label: 'Jul 2025 P2 Q26: CNF with ε and unit rules', text: `A -> AaB | Ca | Ba\nB -> aB | ε\nC -> CaC\nD -> Aa`, alphabet: 'a' },
+  { id: 'n24', label: 'Nov 2024 Q27: sentence grammar (CNF, GNF, parse tree)', text: `S -> NP VP\nN -> cat | dog\nNP -> the N | NP that VP\nVI -> barks | bites\nVT -> bites | catches\nVP -> VI | VT NP`, words: 'the dog catches the cat' },
+  { id: 'n25', label: 'Nov 2025 Q26: voice commands (derive, CNF, GNF)', text: `S -> VP | Aux VP\nVP -> V NP | V\nNP -> Det N | N\nDet -> the | a | ε\nN -> cooler | fan | door\nV -> on | off | open | close\nAux -> please`, words: 'please open the door' }
+];
+P.ambig = [
+  { id: 'n25', label: 'Nov 2025 Q22b: S→aSb|bSa|SS|ε', text: `S -> aSb | bSa | SS | ε` },
+  { id: 'n24', label: 'Nov 2024 Q22a: S→AS|A, A→aAb|c', text: `S -> AS | A\nA -> aAb | c` },
+  { id: 'j1', label: 'Jul 2025 P1 Q22b: S→0S1S|1S0S|ε', text: `S -> 0S1S | 1S0S | ε` },
+  { id: 'j1b', label: 'Jul 2025 P1 Q22b-ii (2): S→AA, A→aAb|bAa|ε', text: `S -> AA\nA -> aAb | bAa | ε` },
+  { id: 'j1g', label: 'Jul 2025 P1 Q22b-i as I read it: S→AB, A→BSB|BB|b, B→aAb|a', text: `S -> AB\nA -> BSB | BB | b\nB -> aAb | a` },
+  { id: 'unamb', label: 'Control: S→aSb|ε (unambiguous)', text: `S -> aSb | ε` }
+];
+
+P.pda = [
+  { id: 'eq', label: 'Equal number of a and b (Jul 2025 P1 Q23a, Nov 2025 Q23a)', tests: ['baab', 'abba', 'aab', ''], text: `start: q0
+stack: Z0
+final: qf
+q0 a Z0 -> q0 aZ0
+q0 b Z0 -> q0 bZ0
+q0 a a -> q0 aa
+q0 b b -> q0 bb
+q0 a b -> q0 ε
+q0 b a -> q0 ε
+q0 ε Z0 -> qf Z0` },
+  { id: 'abcd', label: 'aⁿbⁿcᵐdᵐ (Jul 2025 P1 Q23b, May 2026 Q23b)', tests: ['aabbcd', 'abcd', 'aabbccdd', 'aabcd'], text: `start: q0
+stack: Z0
+final: qf
+q0 a Z0 -> q0 aZ0
+q0 a a -> q0 aa
+q0 b a -> q1 ε
+q1 b a -> q1 ε
+q1 ε Z0 -> q2 Z0
+q2 c Z0 -> q2 cZ0
+q2 c c -> q2 cc
+q2 d c -> q3 ε
+q3 d c -> q3 ε
+q3 ε Z0 -> qf Z0` },
+  { id: 'mnbc', label: 'a^(m+n) bᵐ cⁿ (Nov 2024 Q23a-i)', tests: ['aabc', 'aab', 'abc', 'aaabbc', ''], text: `start: q0
+stack: Z0
+final: qf
+q0 a Z0 -> q0 aZ0
+q0 a a -> q0 aa
+q0 ε Z0 -> q1 Z0
+q0 ε a -> q1 a
+q1 b a -> q1 ε
+q1 ε Z0 -> q2 Z0
+q1 ε a -> q2 a
+q2 c a -> q2 ε
+q2 ε Z0 -> qf Z0` },
+  { id: 'anbn', label: 'aⁿbⁿ, n ≥ 0 (warm-up)', tests: ['aabb', 'aab', ''], text: `start: q0
+stack: Z0
+final: qf
+q0 a Z0 -> q0 aZ0
+q0 a a -> q0 aa
+q0 b a -> q1 ε
+q1 b a -> q1 ε
+q0 ε Z0 -> qf Z0
+q1 ε Z0 -> qf Z0` }
+];
+P.cfg2pda = [
+  { id: 'n24', label: 'S→0BB, B→0S|1S|0 and 010⁴ (Nov 2024 Q23b, Jul 2025 P1 Q23a-ii)', text: `S -> 0BB\nB -> 0S | 1S | 0`, tests: ['010000', '0000', '01'] },
+  { id: 'n25', label: 'E→E+E | E*E | a and a*a (Nov 2025 Q23b)', text: `E -> E+E | E*E | a`, tests: ['a*a', 'a+a*a', 'a+'] },
+  { id: 'm26', label: 'S→aA, A→aABC|bB|a, B→b, C→c and abcba (May 2026 Q23a)', text: `S -> aA\nA -> aABC | bB | a\nB -> b\nC -> c`, tests: ['abcba', 'aa', 'abb'] }
+];
+
+P.tm = [
+  { id: 'anbncn', label: 'aⁿbⁿcⁿ  (Nov 2024 Q24a, Nov 2025 Q24b)', tests: ['aabbcc', 'aaabbbccc', 'aabbc'], text: `start: q0
+accept: qf
+# for n >= 0 also add:  q0 B -> qf B R
+q0 a -> q1 X R
+q0 Y -> q4 Y R
+q1 a -> q1 a R
+q1 Y -> q1 Y R
+q1 b -> q2 Y R
+q2 b -> q2 b R
+q2 Z -> q2 Z R
+q2 c -> q3 Z L
+q3 a -> q3 a L
+q3 b -> q3 b L
+q3 Y -> q3 Y L
+q3 Z -> q3 Z L
+q3 X -> q0 X R
+q4 Y -> q4 Y R
+q4 Z -> q4 Z R
+q4 B -> qf B R` },
+  { id: 'zn1n', label: '0ⁿ1ⁿ  (Jul 2025 P1 Q24a-ii)', tests: ['000111', '0011', '0111'], text: `start: q0
+accept: qf
+q0 0 -> q1 X R
+q0 Y -> q3 Y R
+q1 0 -> q1 0 R
+q1 Y -> q1 Y R
+q1 1 -> q2 Y L
+q2 0 -> q2 0 L
+q2 Y -> q2 Y L
+q2 X -> q0 X R
+q3 Y -> q3 Y R
+q3 B -> qf B R` },
+  { id: 'wwr', label: 'w wᴿ, even palindromes  (May 2025, Jul 2025 P1 Q24b, P2 Q27)', tests: ['abba', 'aabbaa', 'aba', 'ab'], text: `start: q0
+accept: qf
+q0 a -> q1 B R
+q0 b -> q2 B R
+q0 B -> qf B R
+q1 a -> q1 a R
+q1 b -> q1 b R
+q1 B -> q3 B L
+q3 a -> q5 B L
+q2 a -> q2 a R
+q2 b -> q2 b R
+q2 B -> q4 B L
+q4 b -> q5 B L
+q5 a -> q5 a L
+q5 b -> q5 b L
+q5 B -> q0 B R` },
+  { id: 'add', label: 'Unary addition m + n  (Nov 2024 Q24b, Jul 2025 P2 Q24b)', tests: ['11011', '1101', '0111'], text: `start: q0
+accept: qf
+# input 1^m 0 1^n  ->  output 1^(m+n)
+q0 1 -> q0 1 R
+q0 0 -> q1 1 R
+q1 1 -> q1 1 R
+q1 B -> q2 B L
+q2 1 -> qf B R` },
+  { id: 'sub', label: 'Proper subtraction m ∸ n  (Jul 2025 P1 Q24a-i)', tests: ['111011', '110111', '1101'], text: `start: q0
+accept: qf
+# input 1^m 0 1^n  ->  output 1^(m-n), or empty if m <= n
+q0 1 -> q0 1 R
+q0 0 -> q1 0 R
+q1 X -> q1 X R
+q1 1 -> q2 X L
+q1 B -> q4 B L
+q2 X -> q2 X L
+q2 0 -> q3 0 L
+q3 X -> q3 X L
+q3 1 -> q5 X R
+q3 B -> q6 B R
+q5 X -> q5 X R
+q5 0 -> q1 0 R
+q4 X -> q4 B L
+q4 0 -> q4 B L
+q4 1 -> q8 1 L
+q4 B -> qf B R
+q8 1 -> q8 1 L
+q8 B -> qf B R
+q6 X -> q6 B R
+q6 1 -> q6 B R
+q6 0 -> q6 B R
+q6 B -> qf B R` },
+  { id: 'mul', label: 'Unary multiplication m × n  (May 2025 Q27, Nov 2025 Q27)', tests: ['110111', '1101', '1110111'], text: `start: q0
+accept: qf
+# input 1^m 0 1^n  ->  output 1^(m*n)
+# 1. add a 0 after n:  1^m 0 1^n 0
+q0 1 -> q0 1 R
+q0 0 -> q0 0 R
+q0 B -> q1 0 L
+q1 1 -> q1 1 L
+q1 0 -> q1 0 L
+q1 B -> q2 B R
+# 2. take the next 1 of m
+q2 X -> q2 X R
+q2 1 -> q3 X R
+q2 0 -> q11 0 L
+# 3. walk to the n block
+q3 1 -> q3 1 R
+q3 0 -> q4 0 R
+# 4. copy each 1 of n to the end
+q4 Y -> q4 Y R
+q4 1 -> q5 Y R
+q4 0 -> q8 0 L
+q5 1 -> q5 1 R
+q5 0 -> q6 0 R
+q6 1 -> q6 1 R
+q6 B -> q7 1 L
+q7 1 -> q7 1 L
+q7 0 -> q7 0 L
+q7 Y -> q4 Y R
+# 5. restore n and go back to m
+q8 Y -> q8 1 L
+q8 0 -> q10 0 L
+q10 1 -> q10 1 L
+q10 X -> q10 X L
+q10 B -> q2 B R
+# 6. clean up, leave only the product
+q11 X -> q11 B L
+q11 B -> q12 B R
+q12 B -> q12 B R
+q12 0 -> q13 B R
+q13 1 -> q13 B R
+q13 0 -> qf B R` },
+  { id: 'copy', label: 'Copy w to ww  (May 2026 Q27)', tests: ['10', '010', '1'], text: `start: q0
+accept: qf
+# input w over {0,1}  ->  output ww.  X,Y mark 0,1 already copied; A,C hold the copies
+q0 0 -> q1 X R
+q0 1 -> q2 Y R
+q0 A -> q5 0 R
+q0 C -> q5 1 R
+q0 B -> qf B R
+q1 0 -> q1 0 R
+q1 1 -> q1 1 R
+q1 A -> q1 A R
+q1 C -> q1 C R
+q1 B -> q3 A L
+q2 0 -> q2 0 R
+q2 1 -> q2 1 R
+q2 A -> q2 A R
+q2 C -> q2 C R
+q2 B -> q3 C L
+q3 0 -> q3 0 L
+q3 1 -> q3 1 L
+q3 A -> q3 A L
+q3 C -> q3 C L
+q3 X -> q0 X R
+q3 Y -> q0 Y R
+q5 A -> q5 0 R
+q5 C -> q5 1 R
+q5 B -> q6 B L
+q6 0 -> q6 0 L
+q6 1 -> q6 1 L
+q6 X -> q6 0 L
+q6 Y -> q6 1 L
+q6 B -> qf B R` },
+  { id: 'endb', label: 'Strings ending with b  (May 2026 Q24b)', tests: ['aab', 'abba', 'bab', 'b'], text: `start: q0
+accept: qf
+q0 a -> q0 a R
+q0 b -> q1 b R
+q1 a -> q0 a R
+q1 b -> q1 b R
+q1 B -> qf B R` }
+];
+
+P.pcp = [
+  { id: 'j2', label: 'Jul 2025 P2 Q25a: A=(1,10111,10)  B=(111,10,0)', tiles: [['1', '111'], ['10111', '10'], ['10', '0']] },
+  { id: 'j1', label: 'Jul 2025 P1 Q26: A=(ab,bbab,baa,b)  B=(abbb,a,aa,bbb)', tiles: [['ab', 'abbb'], ['bbab', 'a'], ['baa', 'aa'], ['b', 'bbb']] },
+  { id: 'n25', label: 'Nov 2025 Q25b: A=(a,bab,bb,abba)? B=(ab,b,bab,ba)', tiles: [['a', 'ab'], ['bab', 'b'], ['bb', 'bab'], ['abba', 'ba']] },
+  { id: 'm26', label: 'May 2026 Q25b: M=(ab,bab,bbaaa)  N=(a,ba,bab)', tiles: [['ab', 'a'], ['bab', 'ba'], ['bbaaa', 'bab']] },
+  { id: 'm25', label: 'May 2025 Q25a: A=(y, yxy³, yx)  B=(y³, yx, x)', tiles: [['y', 'yyy'], ['yxyyy', 'yx'], ['yx', 'x']] }
+];
+
+if (typeof module !== 'undefined' && module.exports) module.exports = P; else root.PRESETS = P;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* Analysis data read from the six past papers, quiz bank, and theory notes. */
+(function (root) {
+const D = {};
+D.papers = [
+  { id: 'N24', short: 'Nov 24', long: 'Nov 2024' },
+  { id: 'M25', short: 'May 25', long: 'May 2025' },
+  { id: 'J1', short: 'Jul 25 P1', long: 'Jul 2025 (6-page paper)' },
+  { id: 'J2', short: 'Jul 25 P2', long: 'Jul 2025 Paper 2' },
+  { id: 'N25', short: 'Nov 25', long: 'Nov/Dec 2025' },
+  { id: 'M26', short: 'May 26', long: 'May 2026' }
+];
+D.units = {
+  1: 'Unit 1 · Finite automata and regular expressions',
+  2: 'Unit 2 · Regular sets and context-free grammars',
+  3: 'Unit 3 · Pushdown automata',
+  4: 'Unit 4 · Turing machines',
+  5: 'Unit 5 · Complexity and undecidability'
+};
+// hits order: N24, M25, J1, J2, N25, M26. A string is the question number; 15 in a hit means a 15-mark Part C question.
+const T = (unit, name, hits, effort, tool, tip, extra = {}) => Object.assign({ unit, name, hits, effort, tool, tip }, extra);
+D.topics = [
+  T(1, 'NFA to DFA (subset construction, ε-closure)', ['21a', null, '21a·21b', '21b', null, '21b'], 1, 'fa', 'Mechanical. Same table every time. The "second-last symbol is 1" NFA came up twice.'),
+  T(1, 'Mealy and Moore machines (design, convert, run)', ['21b', '21b', '21a·21b', null, null, '21a'], 1, 'fa', 'Know Mealy to Moore (state, output) pairs and Moore to Mealy.'),
+  T(1, 'Design or minimize a DFA', ['26¹⁵', '21a·26¹⁵', '22a', '21a', '21a', null], 2, 'fa', 'Table-filling for minimization; design from the language, then test strings.'),
+  T(1, 'Regular expression to automaton and back (Rᵢⱼᵏ, RE to DFA)', ['26¹⁵', null, '27¹⁵', '21a', null, null], 2, 'fa', 'Appears inside 15-mark questions. Practise one Rᵢⱼᵏ and one state elimination.'),
+  T(1, 'Pumping lemma (regular and CFL proofs)', [null, '26¹⁵', null, '23b', '21b', null], 2, 'undec', 'Fixed proof template: pick w, split, pump, contradiction.'),
+  T(2, 'Simplify a CFG (ε, unit, useless)', ['27¹⁵', '22a', '27¹⁵', '22a·26¹⁵', '26¹⁵', '22a·22b'], 1, 'gram', 'In every paper. It is also step 1 of CNF and GNF.'),
+  T(2, 'Chomsky normal form', ['27¹⁵', null, '27¹⁵', '26¹⁵', '26¹⁵', '22a'], 2, 'gram', 'Five papers. Usually the 15-mark option.'),
+  T(2, 'Greibach normal form', ['27¹⁵', '22b', '22b', '22b', '26¹⁵', '26¹⁵'], 3, 'gram', 'In every paper, three times as an 8-marker and three as the 15-marker. The single best topic to master.'),
+  T(2, 'Ambiguity of a grammar', ['22a', null, '22b', null, '22b', null], 1, 'gram', 'Show one string with two leftmost derivations or two parse trees.'),
+  T(2, 'Write a CFG, derivations, parse trees', ['22b·27¹⁵', '23b', null, null, '22a·26¹⁵', null], 2, 'gram', 'Leftmost derivation for a given string, then the parse tree.'),
+  T(2, 'Properties of regular sets (closure)', ['22a', null, null, null, '22b', null], 1, 'plan', 'Union, concatenation, Kleene star, complement, intersection, reversal, each with one example.'),
+  T(3, 'Design a PDA for a language', ['23a', '23a·23b', '23a·23b', null, '23a', '23b'], 2, 'pda', 'Equal a and b, aⁿbⁿcᵐdᵐ, a^(m+n)bᵐcⁿ. Give the δ table and trace one string.'),
+  T(3, 'CFG to PDA and trace a string', ['23b', '23b', '23a', null, '23b', '23a'], 1, 'pda', 'Two moves only: expand a variable, match a terminal. The same grammar (010⁴) was asked twice.'),
+  T(3, 'PDA to CFG', [null, null, '23b', '23a', null, null], 3, 'pda', 'Triple construction [p X q]. Lower priority.'),
+  T(4, 'Any Turing machine construction (8 or 15 marks)', ['24a·24b', '24a·27¹⁵', '24a·24b', '24a·24b·27¹⁵', '24b·27¹⁵', '24b·27¹⁵'], 3, 'tm', 'Every paper has a TM design option in Unit 4, and four of six also put one in Part C.'),
+  T(4, 'TM unary arithmetic (add, subtract, multiply)', ['24b', '27¹⁵', '24a', '24b', '27¹⁵', null], 2, 'tm', 'Addition is the easy 8-marker. Multiplication shows up as the 15-marker.'),
+  T(4, 'TM for w wᴿ, ww or copy w to ww', [null, '24a', '24b', '27¹⁵', null, '27¹⁵'], 3, 'tm', 'Cross-off method. Draw the transition diagram and show a trace.'),
+  T(4, 'TM for aⁿbⁿcⁿ or 0ⁿ1ⁿ', ['24a', null, '24a', null, '24b', null], 2, 'tm', 'Mark X, Y, Z. Trace aabbcc or aaabbbccc.'),
+  T(4, 'TM theory notes (tuple, ID, variants, UTM, Rec/RE)', [null, '24a·24b', null, null, '24a', '24a'], 1, 'undec', 'Multitape, multihead, nondeterministic, universal TM. Learn a half-page each.'),
+  T(5, 'PCP and MPCP (solve an instance, undecidability)', [null, '25a', '26¹⁵', '25a', '25b', '25b'], 1, 'undec', 'Five papers. Solve by trying a start tile and tracking the overhang.'),
+  T(5, 'Decidable vs undecidable, recursive vs RE, closure', [null, '25b', null, '25b', '25a', '25a'], 1, 'undec', 'Definitions, examples, and closure under complement.'),
+  T(5, 'Rice theorem, Lₑ, halting problem', ['25b', null, '25a·25b', null, null, null], 2, 'undec', 'Statement plus proof by reduction from the acceptance problem.'),
+  T(5, 'P, NP, NP-complete, NP-hard', ['25a', '25a', null, null, null, null], 1, 'undec', 'Definitions, Venn picture, SAT and Cook–Levin. Also feeds Part A.')
+];
+D.topics.forEach(t => { t.count = t.hits.filter(Boolean).length; t.tier = t.count >= 5 ? 1 : t.count >= 3 ? 2 : 3; });
+
+D.slots = [
+  { unit: 1, title: 'Q21 · Finite automata (8 marks)', cover: ['NFA to DFA', 'Mealy / Moore', 'Design or minimize a DFA'], why: 'In all six papers at least one of the two options is one of these three. Nov 2025 is covered only by the DFA design option (the other was a pumping-lemma proof).' },
+  { unit: 2, title: 'Q22 · Grammars (8 marks)', cover: ['Greibach normal form', 'Simplify + CNF', 'Ambiguity'], why: 'Four papers offered GNF, CNF or simplification here. Nov 2024 and Nov 2025 did not, and both offered ambiguity instead.' },
+  { unit: 3, title: 'Q23 · Pushdown automata (8 marks)', cover: ['Design a PDA', 'CFG to PDA', 'PDA to CFG'], why: 'Jul 2025 P2 is the only paper without a design or CFG→PDA option, and it asked PDA→CFG.' },
+  { unit: 4, title: 'Q24 · Turing machines (8 marks)', cover: ['aⁿbⁿcⁿ / 0ⁿ1ⁿ', 'Unary add / subtract', 'ww / wwᴿ', 'TM variants notes'], why: 'Short notes on TM variants, the universal TM or recursive/RE languages replaced one option in three papers (May 2025, Nov 2025, May 2026), so a half page of notes is cheap insurance next to the designs.' },
+  { unit: 5, title: 'Q25 · Undecidability (8 marks)', cover: ['PCP / MPCP', 'Rice + Lₑ', 'Decidable vs undecidable'], why: 'PCP appears in five papers. Nov 2024 is the exception, and it asked Rice and P/NP.' },
+  { unit: 0, title: 'Q26 / Q27 · Part C (15 marks, pick one)', cover: ['CNF then GNF', 'A TM design (multiply, copy, ww)', 'DFA to RE + pumping lemma'], why: 'A normal-form conversion was one of the two choices in five papers, and a TM design in four. Between them every paper is covered.' }
+];
+
+D.repeats = [
+  { what: 'NFA where the second-last symbol is 1, convert to DFA, test 100010 and 100000', where: 'Nov 2024 Q21a and Jul 2025 P2 Q21b (word for word)' },
+  { what: 'Grammar S→0BB, B→0S|1S|0 converted to a PDA, test 010⁴', where: 'Nov 2024 Q23b and Jul 2025 P1 Q23a(ii)' },
+  { what: 'PDA for aⁿbⁿcᵐdᵐ', where: 'Jul 2025 P1 Q23b and May 2026 Q23b' },
+  { what: 'NPDA for an equal number of a and b', where: 'Jul 2025 P1 Q23a(i) and Nov 2025 Q23a (trace baab)' },
+  { what: 'TM for aⁿbⁿcⁿ', where: 'Nov 2024 Q24a and Nov 2025 Q24b' },
+  { what: 'TM unary addition', where: 'Nov 2024 Q24b and Jul 2025 P2 Q24b' },
+  { what: 'TM for unary multiplication (15 marks)', where: 'May 2025 Q27 and Nov 2025 Q27' },
+  { what: 'TM for w wᴿ', where: 'Jul 2025 P1 Q24b and Jul 2025 P2 Q27' },
+  { what: 'Rice theorem', where: 'Nov 2024 Q25b and Jul 2025 P1 Q25a' },
+  { what: 'CFG S→aS|bS|a|b equals (a+b)(a+b)*', where: 'Jul 2025 P1 Q9 and May 2026 Q6 (MCQ)' },
+  { what: 'Z₀ is the initial stack symbol', where: 'Nov 2024 Q12, May 2025 Q9, May 2026 Q12 (MCQ)' }
+];
+
+D.watch = [
+  'Nov 2024 Q23a(ii) asks for a PDA for aⁿbⁿc²ⁿ as printed. That language is not context-free (three counts tied together), so no PDA exists. Skip that option, or say so and prove it with the CFL pumping lemma.',
+  'Jul 2025 P1 Q12 lists two languages that PDAs cannot accept (aⁿbᵐcⁿdᵐ and aⁿbⁿcⁿ). Both are non-CFL, so the question has two correct answers. Do not lose time on it.',
+  'May 2026 Q25b (M = ab, bab, bbaaa; N = a, ba, bab) has no PCP solution because every top string is longer than its bottom string. Say that one sentence and you have the answer.',
+  'Several scans were hard to read. The PCP lists for Nov 2025 and the CFG in Jul 2025 P1 Q22b(i) are my best reading, so check them against your paper before trusting the sample answers.'
+];
+
+/* ---- Part A bank: unit, source, question, options, answer index, why ---- */
+const Q = (u, src, q, o, a, why) => ({ u, src, q, o, a, why });
+D.quiz = [
+  Q(1, 'Nov 2024 Q1', 'S1: {0²ⁿ, n ≥ 1} and S2: {0ᵐ1ⁿ0ᵠ, m,n,q ≥ 1}. Which is correct?', ['Only S1 is regular', 'Only S2 is regular', 'Both are regular', 'Neither is regular'], 2, '0²ⁿ is (00)⁺ and S2 is 0⁺1⁺0⁺. Both have regular expressions.'),
+  Q(1, 'May 2025 Q1', 'Which pair of regular expressions is NOT equivalent?', ['1(01)* and (10)*1', 'x(xx)* and (xx)*x', '(ab)* and a*b*', 'x⁺ and x*x⁺'], 2, '(ab)* allows abab but a*b* does not.'),
+  Q(1, 'May 2025 Q2', 'Minimum states in a DFA (counting the dead state) to check that the 3rd bit is 1 for |w| ≥ 3 over {0,1}?', ['3', '4', '5', '1'], 2, 'q0, q1, q2, an accepting state after a 1 in position 3, and a dead state for a 0 in position 3.'),
+  Q(1, 'May 2025 Q4', 'The expressive power of NFA and ε-NFA is', ['Different', 'Same', 'ε-NFA is more powerful', 'NFA is more powerful'], 1, 'Both accept exactly the regular languages.'),
+  Q(1, 'May 2025 Q3', 'The reverse of a DFA can be formed by', ['Making final states non-final', 'Making the final state the start state and the start state final (reversing arcs)', 'Using a PDA', 'None of these'], 1, 'Reverse every arc, swap start and final. The result may be an NFA.'),
+  Q(1, 'Jul 2025 P2 Q2', 'Minimum states of a DFA over {a,b} that rejects strings with two consecutive a’s (with a dead state)?', ['2', '3', '4', '5'], 1, 'Last symbol not a, last symbol a, and a dead state.'),
+  Q(1, 'Jul 2025 P1 Q6', 'The regular expression (0+1)*0(0+1)*0(0+1)* describes', ['Strings containing the substring 00', 'Strings with at most two 0’s', 'Strings with at least two 0’s', 'Strings that begin and end with 0 or 1'], 2, 'Two explicit 0’s with anything around them.'),
+  Q(1, 'Nov 2025 Q4', 'DFA: δ(q0,a)=q1, δ(q0,b)=q0, δ(q1,a)=q1, δ(q1,b)=q2, δ(q2,a)=q1, δ(q2,b)=q0, final q2. Which string is accepted?', ['aaba', 'abb', 'aab', 'ababb'], 2, 'It accepts strings ending in ab. aab ends in ab.'),
+  Q(1, 'May 2026 Q2', 'States needed to simulate a memory holding 3 words of 8 bits?', ['2^(3×8)', '3^(2×8)', '2^(8+3)', '3^(8×3)'], 0, '24 bits give 2²⁴ configurations.'),
+  Q(1, 'May 2026 Q3', 'A Moore machine is an application of', ['Finite automata without input', 'Finite automata with input', 'Finite automata without output', 'Finite automata with output'], 3, 'Moore and Mealy are automata with output.'),
+  Q(1, 'May 2026 Q4', 'The transition function of a DFA maps', ['Σ × Σ → Q', 'Σ × Q → Σ', 'Q × Σ → Q', 'Q × Q → Σ'], 2, 'Current state and input symbol give the next state.'),
+  Q(2, 'May 2025 Q12', 'Grammar: 1. S→AS  2. S→AAS  3. S→SA  4. A→aa. Which productions violate CNF?', ['2, 4', '1, 3', '1, 2, 3, 4', '2, 3, 4'], 0, 'CNF allows A→BC or A→a. AAS has three symbols and aa is two terminals.'),
+  Q(2, 'Nov 2025 Q7', 'Which production is in Chomsky normal form?', ['a → AA', 'D → aDD', 'A → aB', 'D → AB'], 3, 'Exactly two variables on the right.'),
+  Q(2, 'May 2026 Q5', 'Productions of the form A → aα with a a terminal and α a string of variables are in', ['Regular grammar', 'Chomsky normal form', 'Linear grammar', 'Greibach normal form'], 3, 'GNF starts with one terminal followed by variables.'),
+  Q(2, 'Jul 2025 P2 Q7', 'In Greibach normal form each production has the form', ['A → BCA', 'A → aBA', 'A → BaA', 'B → BBaaAA'], 1, 'Terminal first, then only variables.'),
+  Q(2, 'May 2026 Q8', 'Concatenating the leaf labels of a derivation tree from left to right gives the', ['Root', 'Yield', 'Child', 'Production'], 1, 'That string is called the yield.'),
+  Q(2, 'Nov 2025 Q8', 'In a parse tree, a leaf node always represents', ['Terminals', 'Variables', 'Start symbols', 'Production rules'], 0, 'Leaves are terminals (or ε).'),
+  Q(2, 'Jul 2025 P2 Q6', 'In a derivation tree the internal nodes represent', ['Terminals', 'Non-terminals', 'Productions', 'Start symbols'], 1, 'Only non-terminals have children.'),
+  Q(2, 'May 2026 Q6 · Jul 2025 P1 Q9', 'S → aS | bS | a | b is equivalent to the regular expression', ['a+b', '(a+b)*', '(a+b)(a+b)*', '(a+b)(a+b)'], 2, 'One or more symbols, so (a+b)⁺.'),
+  Q(2, 'May 2026 Q7', 'Which string is NOT generated by S → SaSbS | ε?', ['aabb', 'aaabb', 'aababb', 'abab'], 1, 'Every string has equally many a and b. aaabb has three a and two b.'),
+  Q(2, 'Nov 2024 Q8', 'Match: 1) Type 0  2) Type 1  3) Type 2  4) Type 3 with i) Regular  ii) Context sensitive  iii) Unrestricted  iv) Context free', ['1-iii, 2-ii, 3-iv, 4-i', '1-iv, 2-ii, 3-iii, 4-i', '1-i, 2-ii, 3-iii, 4-iv', '1-ii, 2-iii, 3-iv, 4-i'], 0, 'Type 0 unrestricted, Type 1 context sensitive, Type 2 context free, Type 3 regular.'),
+  Q(2, 'Nov 2025 Q6', 'Which statement about regular sets is NOT correct?', ['Union is associative and commutative', 'Concatenation is associative and commutative', '{ε} is the identity for concatenation', 'Concatenation distributes over union'], 1, 'Concatenation is not commutative: ab ≠ ba.'),
+  Q(3, 'Nov 2024 Q12', 'In PDA notation, Z₀ represents the', ['Element of state', 'Initial stack symbol', 'Final state', 'Top stack alphabet'], 1, 'Z₀ marks the bottom of the stack at the start.'),
+  Q(3, 'May 2025 Q10', 'A pushdown machine represents which grammar type?', ['Type 3', 'Type 2', 'Type 1', 'Type 0'], 1, 'PDAs accept context-free languages, which are Type 2.'),
+  Q(3, 'May 2026 Q11', 'A PDA configuration (p, w, y) is written as', ['(current state, unprocessed input, stack content)', '(unprocessed input, stack content, current state)', '(current state, stack content, unprocessed input)', '(current symbol, unprocessed input, stack input)'], 0, 'State, remaining input, stack.'),
+  Q(3, 'Nov 2025 Q10', 'Instantaneous description of a PDA where q is the state, w the unread input and u the stack', ['(u, q, w)', '(q, u, w)', '(w, q, u)', '(q, w, u)'], 3, 'State first, then input, then stack.'),
+  Q(3, 'Jul 2025 P2 Q11', 'Which PDA is equivalent in power to a context-free grammar?', ['Deterministic PDA', 'Non-deterministic PDA', 'Finite automaton', 'Turing machine'], 1, 'DPDAs accept only deterministic CFLs.'),
+  Q(3, 'Jul 2025 P1 Q17', 'Which conversion is NOT possible algorithmically?', ['Regular grammar to CFG', 'NPDA to DPDA', 'NFA to DFA', 'NTM to DTM'], 1, 'NPDAs are strictly more powerful than DPDAs.'),
+  Q(3, 'Jul 2025 P1 Q14', 'L1 = {0ⁿ1ⁿ}, L2 = {wcwᴿ}, L3 = {wwᴿ}. Which are deterministic CFLs?', ['Only L3', 'Only L1', 'Only L1 and L2', 'All three'], 2, 'L3 needs a guess for the middle, which needs nondeterminism.'),
+  Q(3, 'Jul 2025 P2 Q12', 'The pumping lemma for regular languages is mainly used to prove that a language', ['Is regular', 'Is not regular', 'Is context-free', 'Is finite'], 1, 'It can only show non-regularity.'),
+  Q(3, 'Nov 2024 Q5', 'The language accepted by a pushdown automaton is', ['Context free', 'Regular', 'Recursive', 'Context aware'], 0, 'PDA ⇔ CFG.'),
+  Q(3, 'Nov 2025 Q9', 'The transition function of a PDA is', ['δ: Q × (Σ∪{ε}) × Γ → Q × Γ*', 'δ: Q × (Σ∪{ε}) → Q × Γ*', 'δ: Q × (Σ∪{ε}) × Γ → Q', 'δ: Q × (Σ∪{ε}) × Γ → Γ*'], 0, 'State, input or ε, and stack top go to a new state and a stack string.'),
+  Q(4, 'Nov 2024 Q16', 'The halting states of a Turing machine are', ['Start and stop', 'Accept and reject', 'Reject and allow', 'Start and reject'], 1, 'The machine halts by accepting or rejecting.'),
+  Q(4, 'Nov 2024 Q14', 'A Turing machine operates over', ['Infinite memory tape', 'Finite memory tape', 'No memory tape', 'Queue memory'], 0, 'The tape is unbounded in both directions.'),
+  Q(4, 'Jul 2025 P2 Q15', 'If δ is not defined for the current state and tape symbol, the machine', ['Does not halt', 'Halts', 'Goes into a loop forever', 'Does not go into a loop'], 1, 'No move available means it halts.'),
+  Q(4, 'May 2026 Q14', 'If a language L is recursive then', ['A TM exists that does not guarantee halting', 'A TM exists that never halts', 'No TM exists', 'A TM exists that always halts'], 3, 'Recursive means decidable.'),
+  Q(4, 'May 2026 Q16', 'Non-deterministic Turing machines are', ['Less powerful than deterministic TMs', 'Equivalent in power to deterministic TMs', 'More powerful than deterministic TMs', 'Not equal to deterministic TMs'], 1, 'They accept the same languages, possibly slower to simulate.'),
+  Q(4, 'Nov 2025 Q13', 'A universal Turing machine is capable of', ['Solving only arithmetic functions', 'Working only as a Mealy machine', 'Simulating any other Turing machine', 'Accepting only regular languages'], 2, 'It takes ⟨M, w⟩ as input and simulates M on w.'),
+  Q(4, 'May 2025 Q16 · Nov 2025 Q15', 'Recursively enumerable languages are closed under', ['Union only', 'Intersection only', 'Union and intersection', 'Neither'], 2, 'Not closed under complement.'),
+  Q(4, 'Jul 2025 P2 Q13', 'In T = (Q, Σ, Γ, q₀, δ), what does Γ represent?', ['Tape alphabet', 'Input symbols', 'Transition function', 'Initial state'], 0, 'Σ is the input alphabet, Γ the tape alphabet.'),
+  Q(4, 'Jul 2025 P1 Q16', 'The language {aᵖ | p is prime}', ['Is regular but not context free', 'Is neither regular nor context free, but is accepted by a TM', 'Is not accepted by a TM', 'Is context free but not regular'], 1, 'Pumping lemmas rule out regular and CFL, but a TM can test primality.'),
+  Q(4, 'May 2026 Q13', 'In a TM the transition function is defined on a state and a ______ symbol', ['Input and tape', 'Only input', 'Only tape', 'Only blank'], 2, 'δ(q, X) with X from the tape alphabet.'),
+  Q(5, 'Nov 2024 Q19', 'CNF-satisfiability belongs to', ['NP class', 'P class', 'NP-complete', 'NP-hard'], 2, 'SAT is the first NP-complete problem (Cook–Levin).'),
+  Q(5, 'Nov 2025 Q17', 'Which is TRUE about complexity classes?', ['Every NP-complete problem is NP-hard and belongs to NP', 'NP-hard ⊆ P', 'NP-complete ⊆ P', 'Every NP-hard problem is NP-complete'], 0, 'NP-complete = NP ∩ NP-hard.'),
+  Q(5, 'Nov 2025 Q18', 'The Modified PCP differs from PCP because', ['MPCP is decidable and PCP is not', 'MPCP needs an even number of tiles', 'The sequence must start with the first tile in PCP', 'The sequence must start with the first tile in MPCP'], 3, 'MPCP forces tile 1 to be first.'),
+  Q(5, 'May 2026 Q20', 'If P ≠ NP, which holds?', ['NP-hard = NP', 'P = NP-complete', 'NP-complete ∩ P = ∅', 'NP-complete = NP'], 2, 'No NP-complete problem can then be solved in polynomial time.'),
+  Q(5, 'May 2026 Q19', 'Which problem is in class P?', ['Hamiltonian circuit', 'Travelling salesman', 'Finding a shortest path in a graph', 'Graph colouring'], 2, 'Dijkstra and BFS run in polynomial time.'),
+  Q(5, 'May 2025 Q19', 'Which of these is NOT NP-hard?', ['Hamiltonian circuit', '0/1 knapsack', 'Finding bi-connected components of a graph', 'Graph colouring'], 2, 'Bi-connected components are found in linear time.'),
+  Q(5, 'May 2025 Q6', 'If a problem needs O(Nᵏ) steps, it is solved in', ['Non-polynomial time', 'Polynomial time', 'Infinite time', 'None of these'], 1, 'Fixed k means polynomial.'),
+  Q(5, 'Nov 2025 Q14', 'The halting problem for Turing machines is', ['Decidable', 'Undecidable', 'Regular', 'Context free'], 1, 'Turing’s diagonal argument.'),
+  Q(5, 'Nov 2025 Q16', 'If a non-deterministic TM decides a language in polynomial time, the language belongs to', ['P', 'NP-hard', 'NP-complete', 'NP'], 3, 'That is the definition of NP.'),
+  Q(5, 'Jul 2025 P1 Q18', 'Which is true?', ['The complement of a recursive or RE language is RE', 'The complement of an RE language is RE', 'The complement of a recursive language is recursive', 'The complement of a CFL is context free'], 2, 'Recursive languages are closed under complement. RE and CFL are not.'),
+  Q(5, 'May 2026 Q17 · Jul 2025 P1 Q19', 'If L and its complement are both recursively enumerable, then L is', ['Regular', 'Context sensitive', 'Context free', 'Recursive'], 3, 'Run both machines in parallel. One of them must accept.'),
+  Q(5, 'May 2026 Q18', 'A TM accepts every word of L and either rejects or loops on every word not in L. Then L is', ['Recursive', 'Recursively enumerable', 'NP-hard', 'NP-complete'], 1, 'Acceptance without a halting guarantee means RE.')
+];
+
+/* ---- Answer skeletons and theory one-pagers ---- */
+D.templates = [
+  { name: 'NFA to DFA (8 marks)', steps: ['Write the NFA transition table, with final states marked.', 'If there are ε-moves, list the ε-closure of every state first.', 'Start state of the DFA is the ε-closure of q0.', 'For each new subset and each symbol, take the union of moves, then its closure. Add any new subset to the table.', 'A subset is final if it holds a final NFA state. Keep ∅ as a dead state if it appears.', 'Rename the subsets, draw the DFA, and test the strings from the question on both machines.'] },
+  { name: 'Mealy and Moore (8 marks)', steps: ['State the difference in one line: Mealy output is on the transition, Moore output is on the state, and Moore output is one symbol longer.', 'Moore to Mealy: output of a transition is the output of its target state.', 'Mealy to Moore: split each state q into (q, o), one copy per output that arrives at q.', 'Add a start state with a chosen initial output if the start state has incoming edges with different outputs.', 'Run one input through both machines to show they agree.'] },
+  { name: 'Minimize a DFA (8 marks)', steps: ['Remove states unreachable from the start.', 'List all pairs. Mark every (final, non-final) pair in round 0.', 'Repeat: mark (p, q) if some symbol takes them to a marked pair.', 'Unmarked pairs are equivalent. Merge them into classes.', 'Draw the minimized DFA and compare the state count.'] },
+  { name: 'Simplify, CNF (8 or 15 marks)', steps: ['ε-productions: find nullable variables, add every version of each rule with them dropped, delete A→ε.', 'Unit productions: for each unit pair (A, B) copy B’s non-unit rules to A, delete A→B.', 'Useless symbols: delete non-generating variables, then unreachable ones.', 'CNF: replace terminals inside longer rules by new variables Cₐ → a.', 'CNF: break rules longer than two symbols with new variables D₁, D₂, …', 'Show the final grammar and confirm every rule is A→BC or A→a.'] },
+  { name: 'Greibach normal form (8 or 15 marks)', steps: ['Simplify first (no ε, no unit rules, no useless symbols). Going through CNF first is allowed and usually safer.', 'Number the variables A₁ … Aₘ.', 'For i = 1 to m: substitute any rule Aᵢ → Aⱼγ with j < i, then remove left recursion Aᵢ → Aᵢα by adding Zᵢ.', 'After this pass every rule starts with a terminal or a higher-numbered variable.', 'Back-substitute from Aₘ up to A₁, then substitute into the Zᵢ rules.', 'Replace terminals that are not first by variables Cₐ → a. State the final grammar.'] },
+  { name: 'PDA design (8 marks)', steps: ['Say the idea in two lines: what you push, what you pop, when you switch phase.', 'Give the 7-tuple, then the δ table (one line per move).', 'State the acceptance mode (final state or empty stack) and stick to it.', 'Trace one accepted string with instantaneous descriptions (q, input left, stack).', 'Trace one rejected string and say why it fails.'] },
+  { name: 'CFG to PDA (8 marks)', steps: ['Use one working state. Push S above Z₀ to start.', 'For each rule A → α add δ(q, ε, A) = (q, α).', 'For each terminal a add δ(q, a, a) = (q, ε).', 'Add δ(q, ε, Z₀) = (qf, Z₀) to accept.', 'Trace the given string, choosing the rule that matches the next input symbol at each step.'] },
+  { name: 'Turing machine (8 or 15 marks)', steps: ['Write the idea as 3 to 5 plain sentences (mark, scan right, return, repeat, verify).', 'List the tape alphabet and what each marker means.', 'Give the transition table or diagram.', 'Trace the sample string from the question step by step with instantaneous descriptions.', 'State when the machine accepts and what it does on a wrong string.'] },
+  { name: 'PCP instance (8 marks)', steps: ['Write the tiles as a table (top over bottom).', 'Pick a first tile whose top and bottom agree as prefixes.', 'Track the overhang after each tile. Extend only with tiles that keep the two strings consistent.', 'Stop when the overhang is empty and give the index sequence with both strings written out.', 'If every tile has a longer top than bottom (or the reverse), say that no sequence can ever balance them.', 'Close with one line: PCP is undecidable in general, so no algorithm decides every instance.'] }
+];
+
+D.theory = [
+  { title: 'Rice’s theorem', body: ['Statement: every non-trivial property of the language accepted by a Turing machine is undecidable. A property is non-trivial if some recursively enumerable languages have it and some do not.', 'Proof idea: assume ∅ does not have the property (otherwise use the complement). Pick a language L₀ with the property, accepted by M₀. Given ⟨M, w⟩, build M′ that on input x first simulates M on w, and if that halts, runs M₀ on x. Then L(M′) = L₀ if M accepts w, and ∅ otherwise.', 'A decider for the property would therefore decide whether M accepts w, which is the undecidable acceptance problem.'] },
+  { title: 'Lₑ is not recursive', body: ['Lₑ = {⟨M⟩ : L(M) = ∅}.', 'Reduce from the acceptance problem. Given ⟨M, w⟩, build M′ that ignores its input, runs M on w, and accepts if M accepts. Then L(M′) ≠ ∅ exactly when M accepts w.', 'A decider for Lₑ would decide acceptance, so Lₑ is not recursive. Its complement is recursively enumerable, so Lₑ itself is not even RE.'] },
+  { title: 'Halting problem', body: ['Claim: no TM decides whether M halts on w.', 'Suppose H does. Build D: on input ⟨M⟩, run H on (M, ⟨M⟩); if H says "halts", loop forever; otherwise halt.', 'Run D on ⟨D⟩. If D halts on ⟨D⟩ then D loops, and if it loops then it halts. Contradiction, so H cannot exist.'] },
+  { title: 'PCP is undecidable', body: ['Show MPCP reduces to PCP by adding a marker symbol to every tile so that the first tile is forced to start.', 'Show the acceptance problem reduces to MPCP: tiles encode one move of M on w each, so a matching sequence exists exactly when M reaches an accepting configuration.', 'So a PCP decider would decide acceptance, which is impossible.'] },
+  { title: 'Decidable, recursive and RE', body: ['Recursive (decidable): some TM halts on every input and accepts exactly L.', 'Recursively enumerable: some TM accepts exactly L, but may loop on strings outside L.', 'L is recursive if and only if both L and its complement are RE.', 'Closure: recursive languages are closed under union, intersection, concatenation, star and complement. RE languages are closed under union, intersection, concatenation and star, but not complement.', 'Examples: halting problem and acceptance problem are RE and undecidable. Their complements are not RE.'] },
+  { title: 'P, NP, NP-complete, NP-hard', body: ['P: decidable by a deterministic TM in polynomial time. NP: decidable by a non-deterministic TM in polynomial time, equivalently a proposed solution can be checked in polynomial time.', 'NP-hard: every problem in NP reduces to it in polynomial time. It need not be in NP.', 'NP-complete: in NP and NP-hard. SAT was the first (Cook–Levin). Others: 3-SAT, clique, vertex cover, Hamiltonian circuit, TSP (decision version).', 'P ⊆ NP. Whether P = NP is open. If any NP-complete problem is in P then P = NP.'] },
+  { title: 'Variants of Turing machines', body: ['Multitape: several tapes with independent heads. Same power as a single tape. A single-tape machine simulates t steps in O(t²) time.', 'Multihead: one tape, several heads. Same power.', 'Two-way infinite tape, multidimensional tape, offline TM: all equivalent in power.', 'Non-deterministic: several choices per move. Accepts the same languages as a deterministic TM, simulated by breadth-first search over configurations (exponential slowdown).', 'Universal TM: takes ⟨M, w⟩ and simulates M on w. A typical build uses three tapes (description of M, tape of M, state of M).'] },
+  { title: 'Pumping lemma, regular', body: ['If L is regular there is p such that every w in L with |w| ≥ p splits as w = xyz with |xy| ≤ p, |y| ≥ 1 and xyⁱz in L for all i ≥ 0.', 'Template for L = {aⁿbⁿ}: assume L is regular with length p. Take w = aᵖbᵖ. Since |xy| ≤ p, y is all a’s, say y = aᵏ with k ≥ 1. Then xy²z has p + k a’s and p b’s, which is not in L. Contradiction.', 'For {0ⁿ10ⁿ} take w = 0ᵖ10ᵖ, and y lies inside the first block of zeros.'] },
+  { title: 'Pumping lemma, context-free', body: ['If L is context free there is p such that every w in L with |w| ≥ p splits as w = uvxyz with |vxy| ≤ p, |vy| ≥ 1 and uvⁱxyⁱz in L for all i ≥ 0.', 'Template for {aⁿbⁿcⁿ}: take w = aᵖbᵖcᵖ. Because |vxy| ≤ p, the part vxy cannot touch all three letters. Pumping then changes at most two letter counts, so the three counts are no longer equal. Contradiction, so the language is not context free.'] },
+  { title: 'Properties of regular sets', body: ['Closed under union, concatenation, Kleene star, complement, intersection, difference and reversal.', 'Examples: (a+b) ∪ c* is regular. The complement of a regular language over Σ is Σ* minus it, built by swapping final and non-final states of a complete DFA. Intersection comes from the product automaton.', 'Closure under concatenation and star is built with ε-moves between NFAs.'] },
+  { title: 'DPDA vs NPDA', body: ['DPDA accepts the deterministic CFLs. NPDA accepts all CFLs, so it is strictly more powerful.', 'Example: {wwᴿ} needs a guess of the middle, so an NPDA accepts it and no DPDA does. {wcwᴿ} is deterministic.', 'Unlike finite automata, nondeterminism cannot be removed from PDAs.'] }
+];
+
+D.facts = {
+  closure: {
+    cols: ['Union', 'Concat.', 'Star', 'Intersection', 'Complement'],
+    rows: [
+      ['Regular', 1, 1, 1, 1, 1],
+      ['Context free', 1, 1, 1, 0, 0],
+      ['Recursive', 1, 1, 1, 1, 1],
+      ['Recursively enumerable', 1, 1, 1, 1, 0]
+    ]
+  },
+  hierarchy: [
+    ['Type 3', 'Regular grammar', 'Finite automaton'],
+    ['Type 2', 'Context-free grammar', 'Pushdown automaton'],
+    ['Type 1', 'Context-sensitive grammar', 'Linear bounded automaton'],
+    ['Type 0', 'Unrestricted grammar', 'Turing machine']
+  ],
+  oneLiners: [
+    ['Z₀', 'initial (bottom) stack symbol'],
+    ['TM halting states', 'accept and reject'],
+    ['MPCP', 'the sequence must start with tile 1'],
+    ['UTM', 'simulates any TM given its description and input'],
+    ['NTM vs DTM', 'same power'],
+    ['NPDA vs DPDA', 'NPDA is more powerful'],
+    ['NFA vs ε-NFA vs DFA', 'same power'],
+    ['SAT', 'NP-complete'],
+    ['L and L̄ both RE', 'L is recursive'],
+    ['CNF rule shape', 'A → BC or A → a'],
+    ['GNF rule shape', 'A → aα, α a string of variables'],
+    ['Pumping lemma regular', 'proves a language is NOT regular']
+  ]
+};
+
+if (typeof module !== 'undefined' && module.exports) module.exports = D; else root.FLA_DATA = D;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function () {
+'use strict';
+const F = window.FLA, P = window.PRESETS, D = window.FLA_DATA;
+
+/* ---------- helpers ---------- */
+const $ = (s, e = document) => e.querySelector(s);
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === 'class') e.className = v; else if (k === 'html') e.innerHTML = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat(Infinity)) { if (c == null || c === false) continue; e.append(c.nodeType ? c : document.createTextNode(String(c))); }
+  return e;
+}
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('fla:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('fla:' + k, JSON.stringify(v)); } catch (e) { /* storage may be unavailable */ } }
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const S = { sort: 'unit', faSub: 'nfa', mmSub: 'mealy', texts: {}, sel: {} };
+const selIndex = (id, def = 0) => (S.sel[id] === undefined ? def : S.sel[id]);
+let timer = null;
+
+function table(headers, rows, opts = {}) {
+  const t = h('table', { class: opts.cls || '' },
+    h('thead', {}, h('tr', {}, headers.map((x, i) => h('th', { class: opts.numCols && opts.numCols.includes(i) ? 'num' : '' }, x)))),
+    h('tbody', {}, rows.map(r => h('tr', {}, r.map((c, i) => h('td', { class: (opts.monoCols && opts.monoCols.includes(i) ? 'mono-cell ' : '') + (opts.numCols && opts.numCols.includes(i) ? 'num' : '') }, c))))));
+  return h('div', { class: 'scroll' }, t);
+}
+function stage(title, ...kids) { return h('div', { class: 'stage' }, h('h3', {}, title), h('div', { class: 'in' }, kids)); }
+function pre(text) { return h('pre', {}, text); }
+function err(e) { return h('div', { class: 'err', role: 'alert' }, e.message || String(e)); }
+function presetSelect(id, list, onPick, def = 0) {
+  const sel = h('select', { id }, list.map((p, i) => h('option', { value: i }, p.label)));
+  sel.value = String(selIndex(id, def));
+  sel.addEventListener('change', () => { S.sel[id] = +sel.value; onPick(list[+sel.value]); });
+  return sel;
+}
+function seg(options, current, onPick) {
+  return h('div', { class: 'seg', role: 'group' }, options.map(([id, label]) => h('button', { type: 'button', 'aria-pressed': String(id === current), onclick: () => onPick(id) }, label)));
+}
+const nm = s => (s.length ? s.join('') : 'ε');
+
+/* ---------- graph drawing ---------- */
+let gid = 0;
+function svgGraph(m) {
+  const id = 'ar' + (++gid), n = m.nodes.length;
+  const maxLen = Math.max(2, ...m.nodes.map(x => x.label.length));
+  const r = Math.min(40, Math.max(20, 10 + maxLen * 4.4));
+  const Rc = n <= 1 ? 0 : Math.max(r * 3.4, (n * (2 * r + 40)) / (2 * Math.PI));
+  const pad = r + 62, cx = Rc + pad, cy = Rc + pad, W = 2 * Rc + 2 * pad, H = 2 * Rc + 2 * pad;
+  const pos = {};
+  m.nodes.forEach((nd, i) => {
+    const a = Math.PI + (i * 2 * Math.PI) / n;
+    const x = cx + Rc * Math.cos(a), y = cy + Rc * Math.sin(a);
+    const ux = n <= 1 ? 0 : Math.cos(a), uy = n <= 1 ? -1 : Math.sin(a);
+    pos[nd.id] = { x, y, ux, uy, nd };
+  });
+  const groups = new Map();
+  for (const e of m.edges) { const k = e.from + '\u0001' + e.to; if (!groups.has(k)) groups.set(k, { from: e.from, to: e.to, labels: [] }); const g = groups.get(k); if (!g.labels.includes(e.label)) g.labels.push(e.label); }
+  let out = '';
+  for (const g of groups.values()) {
+    const A = pos[g.from], B = pos[g.to]; if (!A || !B) continue;
+    const label = esc(g.labels.join(', '));
+    if (g.from === g.to) {
+      const ang = Math.atan2(A.uy, A.ux) + (A.nd.start ? 0.95 : 0);
+      const p = (a, d) => [A.x + d * Math.cos(a), A.y + d * Math.sin(a)];
+      const p1 = p(ang - 0.5, r), p2 = p(ang + 0.5, r + 3), c1 = p(ang - 0.42, r + 46), c2 = p(ang + 0.42, r + 46), lp = p(ang, r + 40);
+      out += `<path class="g-edge" d="M${p1[0]},${p1[1]} C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${p2[0]},${p2[1]}" marker-end="url(#${id})"/><text class="g-el" x="${lp[0]}" y="${lp[1]}">${label}</text>`;
+    } else {
+      const rev = groups.has(g.to + '\u0001' + g.from);
+      const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
+      let dx = B.x - A.x, dy = B.y - A.y; const len = Math.hypot(dx, dy) || 1;
+      const px = -dy / len, py = dx / len;
+      const side = rev ? (m.nodes.findIndex(x => x.id === g.from) < m.nodes.findIndex(x => x.id === g.to) ? 1 : -1) : 0;
+      const bend = rev ? 46 : 0;
+      const C = [mx + px * bend * side, my + py * bend * side];
+      const norm = (P0, P1) => { const d = Math.hypot(P1[0] - P0[0], P1[1] - P0[1]) || 1; return [(P1[0] - P0[0]) / d, (P1[1] - P0[1]) / d]; };
+      const u1 = norm([A.x, A.y], C), u2 = norm([B.x, B.y], C);
+      const s = [A.x + u1[0] * r, A.y + u1[1] * r], e = [B.x + u2[0] * (r + 3), B.y + u2[1] * (r + 3)];
+      const q = [0.25 * s[0] + 0.5 * C[0] + 0.25 * e[0], 0.25 * s[1] + 0.5 * C[1] + 0.25 * e[1]];
+      const off = rev ? 9 * side : 11;
+      out += `<path class="g-edge" d="M${s[0]},${s[1]} Q${C[0]},${C[1]} ${e[0]},${e[1]}" marker-end="url(#${id})"/><text class="g-el" x="${q[0] + px * off}" y="${q[1] + py * off}">${label}</text>`;
+    }
+  }
+  for (const nd of m.nodes) {
+    const P0 = pos[nd.id];
+    if (nd.start) {
+      const a = [P0.x + P0.ux * (r + 34), P0.y + P0.uy * (r + 34)], b = [P0.x + P0.ux * (r + 3), P0.y + P0.uy * (r + 3)];
+      out += `<path class="g-edge" d="M${a[0]},${a[1]} L${b[0]},${b[1]}" marker-end="url(#${id})"/>`;
+    }
+    out += `<circle class="g-node${nd.active ? ' active' : ''}" cx="${P0.x}" cy="${P0.y}" r="${r}"/>`;
+    if (nd.final) out += `<circle class="g-inner" cx="${P0.x}" cy="${P0.y}" r="${r - 5}"/>`;
+    out += `<text class="g-label${nd.active ? ' active' : ''}" x="${P0.x}" y="${P0.y}" style="font-size:${maxLen > 6 ? 10 : 12}px">${esc(nd.label)}</text>`;
+  }
+  const svg = h('div', {});
+  svg.innerHTML = `<svg class="graph" viewBox="0 0 ${W} ${H}" role="img" aria-label="State diagram"><defs><marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="g-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs>${out}</svg>`;
+  return svg.firstChild;
+}
+function faGraph(fa, label) {
+  const edges = [];
+  for (const [k, ts] of Object.entries(fa.trans)) { const [s, a] = k.split('\u0001'); ts.forEach(t => edges.push({ from: s, to: t, label: a })); }
+  return svgGraph({ nodes: fa.states.map(s => ({ id: s, label: (label && label[s]) || s, start: s === fa.start, final: fa.finals.includes(s) })), edges });
+}
+function dfaGraph(d, label) {
+  const edges = []; for (const s of d.states) for (const a of d.alphabet) if (d.delta[s] && d.delta[s][a]) edges.push({ from: s, to: d.delta[s][a], label: a });
+  return svgGraph({ nodes: d.states.map(s => ({ id: s, label: (label && label[s]) || s, start: s === d.start, final: d.finals.includes(s) })), edges });
+}
+function dfaTable(d, label) {
+  const L = s => (label && label[s]) || s;
+  return table(['State', ...d.alphabet], d.states.map(s => [(s === d.start ? '→ ' : '') + (d.finals.includes(s) ? '* ' : '') + L(s), ...d.alphabet.map(a => L(d.delta[s][a]))]), { monoCols: [0, ...d.alphabet.map((_, i) => i + 1)] });
+}
+
+/* ---------- Priorities ---------- */
+const TOOL = { fa: ['Automata lab', 'fa'], gram: ['Grammar lab', 'gram'], pda: ['PDA lab', 'pda'], tm: ['Turing lab', 'tm'], undec: ['Undecidability', 'undec'], plan: ['Study plan', 'plan'] };
+function viewPriority() {
+  const top = D.topics.filter(t => t.count >= 5);
+  const root = h('div', { class: 'view' });
+  root.append(h('section', { class: 'hero' },
+    h('div', { class: 'eyebrow' }, '21CSC301T · six past papers, Nov 2024 to May 2026'),
+    h('h1', {}, 'What the exam keeps asking'),
+    h('p', { class: 'lede' }, 'Every paper has the same shape. The same topics come back in the same slots, and several questions repeat almost word for word. Cover these and each 8-mark choice has an answer ready.')));
+  root.append(h('div', { class: 'stats' },
+    h('div', { class: 'stat' }, h('div', { class: 'big' }, '6', h('small', {}, '/6')), h('span', {}, 'papers asked for a Greibach normal form conversion')),
+    h('div', { class: 'stat' }, h('div', { class: 'big' }, '6', h('small', {}, '/6')), h('span', {}, 'papers asked for CFG simplification (ε, unit, useless)')),
+    h('div', { class: 'stat' }, h('div', { class: 'big' }, '6', h('small', {}, '/6')), h('span', {}, 'papers had a Turing machine design, 4 of them for 15 marks')),
+    h('div', { class: 'stat' }, h('div', { class: 'big' }, String(top.length), h('small', {}, ' topics')), h('span', {}, 'appeared in at least 5 of the 6 papers'))));
+  root.append(h('section', { class: 'card' }, h('h2', {}, 'How the 75 marks are built'),
+    h('div', { class: 'blueprint' },
+      h('div', { class: 'bp' }, h('b', {}, 'Part A · 20 × 1'), h('span', {}, 'Four MCQs per unit, same split every paper. Q1–4 Unit 1 through Q17–20 Unit 5.')),
+      h('div', { class: 'bp' }, h('b', {}, 'Part B · 5 × 8'), h('span', {}, 'Q21 to Q25, one per unit, each with an either/or. Prepare two strong options per unit.')),
+      h('div', { class: 'bp' }, h('b', {}, 'Part C · 1 × 15'), h('span', {}, 'Q26 or Q27. Grammar normal forms or a Turing machine design was one of the two options in every paper.')))));
+  const heat = h('section', { class: 'card' });
+  heat.append(h('div', { class: 'row', style: 'justify-content:space-between' }, h('h2', {}, 'Topic by paper'),
+    seg([['unit', 'Group by unit'], ['freq', 'Most asked first']], S.sort, v => { S.sort = v; render(); })));
+  heat.append(h('div', { class: 'legend' }, h('span', {}, h('i', { class: 'lg8' }), 'asked in a Part B slot (8 marks)'), h('span', {}, h('i', { class: 'lg15' }), 'asked as the 15-mark question (¹⁵)'),
+    h('span', { class: 'muted' }, 'Numbers are question numbers. "21a · 21b" means both options.')));
+  const rows = [];
+  const mk = t => {
+    const tl = TOOL[t.tool];
+    return h('tr', {},
+      h('td', { class: 'topic' }, t.name, h('small', {}, t.tip)),
+      t.hits.map(x => x ? h('td', { class: 'hc ' + (x.includes('¹⁵') ? 'hit15' : 'hit') }, x.replace(/·/g, ' · ')) : h('td', { class: 'hc miss', 'aria-label': 'not asked' }, '–')),
+      h('td', { class: 'num' }, h('span', { class: 'seen', 'aria-hidden': 'true' }, [0, 1, 2, 3, 4, 5].map(i => h('i', { class: i < t.count ? 'on' : '' }))), h('b', {}, t.count + '/6')),
+      h('td', {}, h('span', { class: 'badge t' + t.tier }, t.tier === 1 ? 'MUST' : t.tier === 2 ? 'SHOULD' : 'IF TIME')),
+      h('td', { 'aria-label': ['', 'quick', 'medium', 'long'][t.effort] + ' to learn' }, h('span', { class: 'dots' }, '●'.repeat(t.effort) + '○'.repeat(3 - t.effort))),
+      h('td', {}, h('a', { href: '#' + tl[1] }, tl[0])));
+  };
+  if (S.sort === 'unit') for (const u of [1, 2, 3, 4, 5]) { rows.push(h('tr', { class: 'unit' }, h('th', { colspan: 11 }, D.units[u]))); D.topics.filter(t => t.unit === u).forEach(t => rows.push(mk(t))); }
+  else D.topics.slice().sort((a, b) => b.count - a.count || a.unit - b.unit).forEach(t => rows.push(mk(t)));
+  heat.append(h('div', { class: 'scroll heat' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Topic'), D.papers.map(p => h('th', { class: 'paper' }, p.short)), h('th', { class: 'num' }, 'Seen'), h('th', {}, 'Priority'), h('th', {}, 'Effort'), h('th', {}, 'Drill it'))), h('tbody', {}, rows))));
+  heat.append(h('p', { class: 'small muted' }, 'Priority is by how many of the six papers asked it: MUST is 5 or 6, SHOULD is 3 or 4, IF TIME is 2 or fewer. Effort is my estimate of how long the topic takes to learn.'));
+  root.append(heat);
+  root.append(h('section', { class: 'card' }, h('h2', {}, 'The smallest set that covers every paper'),
+    h('p', {}, 'Each Part B question lets you choose between two options. This is the shortest list of topics for which, in every one of the six papers, at least one option in that slot was on the list.'),
+    h('div', { class: 'grid2' }, D.slots.map(s => h('div', { class: 'slot card' }, h('h3', {}, s.title), h('div', { class: 'chips' }, s.cover.map(c => h('span', { class: 'chip' }, c))), h('p', { class: 'small muted' }, s.why))))));
+  root.append(h('section', { class: 'card' }, h('h2', {}, 'Questions that were asked twice'),
+    h('p', {}, 'These came back in later papers, so work them first.'),
+    table(['Question', 'Where'], D.repeats.map(r => [r.what, r.where]))));
+  root.append(h('section', { class: 'card' }, h('h2', {}, 'Before you trust these notes'), D.watch.map(w => h('div', { class: 'note' }, w))));
+  return root;
+}
+
+/* ---------- Study plan ---------- */
+const BLOCKS = [
+  { id: 'gram', title: 'Grammar normal forms', time: '75 min', tool: 'gram', why: 'GNF and simplification were in 6 of 6 papers, CNF in 5. This is also the 15-mark option most often.', items: [
+    'Simplify and convert to CNF by hand: May 2026 Q22a, then Jul 2025 P1 Q27 (several nullable variables)',
+    'Greibach normal form: May 2025 Q22b (S→AA|a, A→SS|b) and Jul 2025 P2 Q22b',
+    'Do the 15-mark chain once: simplify, CNF, then GNF (Nov 2025 Q26, May 2026 Q26)',
+    'Left recursion: add Z and back-substitute, once without looking',
+    'Ambiguity: find one string with two parse trees (Nov 2025 Q22b)',
+    'Check every answer in the Grammar lab'] },
+  { id: 'tm', title: 'Turing machine designs', time: '90 min', tool: 'tm', why: 'A design was offered in all 6 papers. Four put one in Part C for 15 marks.', items: [
+    'aⁿbⁿcⁿ with markers X, Y, Z (Nov 2024, Nov 2025)',
+    'Unary addition, then subtraction (Nov 2024, Jul 2025 P1 and P2)',
+    'w wᴿ by crossing off both ends (May 2025, Jul 2025 P1 and P2)',
+    'Copy w to ww (May 2026 Q27)',
+    'Unary multiplication (May 2025 Q27, Nov 2025 Q27)',
+    'Be ready to trace the exact sample string with instantaneous descriptions',
+    'Half a page each on TM variants, UTM, recursive vs RE (May 2025, Nov 2025, May 2026)'] },
+  { id: 'pda', title: 'Pushdown automata', time: '60 min', tool: 'pda', why: 'PDA design and CFG to PDA each appeared in 5 papers.', items: [
+    'Equal number of a and b, trace baab (Jul 2025 P1, Nov 2025)',
+    'aⁿbⁿcᵐdᵐ (Jul 2025 P1, May 2026)',
+    'a^(m+n) bᵐ cⁿ (Nov 2024)',
+    'CFG to PDA with trace: S→0BB, B→0S|1S|0 and 010⁴ (Nov 2024, Jul 2025 P1)',
+    'CFG to PDA: E→E+E|E*E|a and a*a (Nov 2025)',
+    'PDA to CFG once (Jul 2025 P1 and P2)'] },
+  { id: 'fa', title: 'Finite automata quick wins', time: '60 min', tool: 'fa', why: 'Cheap marks. NFA to DFA and Mealy/Moore were each in 4 papers, DFA design or minimization in 5.', items: [
+    'NFA to DFA: second-last symbol is 1 (asked twice), May 2026 Q21b',
+    'ε-NFA to DFA with ε-closures (Jul 2025 P1 Q21a)',
+    'Mealy to Moore (May 2026 Q21a) and a Moore machine design (Nov 2024 Q21b)',
+    'Minimize with table filling (May 2025 Q26)',
+    'Design a DFA from the language: no substring xxy, aⁿbᵐ with n ≥ 2',
+    'DFA to regular expression by Rᵢⱼᵏ once (Nov 2024 Q26)'] },
+  { id: 'undec', title: 'PCP, decidability, NP', time: '50 min', tool: 'undec', why: 'PCP was in 5 papers. The theory questions repeat the same definitions.', items: [
+    'Solve each PCP instance from the papers, and say when there is no solution',
+    'MPCP: starts with tile 1',
+    'Rice theorem statement and proof sketch (Nov 2024, Jul 2025 P1)',
+    'Lₑ is not recursive',
+    'Halting problem proof',
+    'Decidable vs undecidable, recursive vs RE, closure under complement',
+    'P, NP, NP-complete, NP-hard with examples'] },
+  { id: 'proofs', title: 'Pumping lemma proofs', time: '30 min', tool: 'undec', why: 'Three papers asked for a proof (May 2025, Jul 2025 P2, Nov 2025).', items: [
+    'aⁿbⁿ is not regular (Jul 2025 P2)',
+    '0ⁿ10ⁿ is not regular (Nov 2025)',
+    'aⁿbⁿcⁿ is not context free (May 2025)'] },
+  { id: 'quiz', title: 'Part A drill', time: '30 min', tool: 'quiz', why: 'Four marks per unit, every paper. The same facts repeat.', items: [
+    'Finish the quiz until every unit scores 80% or more',
+    'Read the quick facts below once'] }
+];
+function viewPlan() {
+  const root = h('div', { class: 'view' });
+  const done = store.get('plan', {});
+  const total = BLOCKS.reduce((a, b) => a + b.items.length, 0);
+  const bar = h('i', {}), count = h('b', {});
+  const upd = () => { const d = Object.values(done).filter(Boolean).length; bar.style.width = Math.round(100 * d / total) + '%'; count.textContent = d + ' of ' + total + ' done'; };
+  root.append(h('section', { class: 'hero' }, h('div', { class: 'eyebrow' }, 'Study plan'), h('h1', {}, 'Where to spend the hours'),
+    h('p', { class: 'lede' }, 'Ordered by how often a topic came up and how many marks it carries. Time boxes are my suggestion, about seven hours in total. Tick things off as you go.'),
+    h('div', { class: 'progress', role: 'progressbar', 'aria-label': 'Plan progress' }, bar), h('div', { class: 'small' }, count)));
+  BLOCKS.forEach((b, i) => {
+    const sec = h('section', { class: 'card block' },
+      h('header', {}, h('span', { class: 'num' }, String(i + 1)), h('h2', { style: 'margin:0' }, b.title), h('span', { class: 'badge t2' }, b.time), h('a', { href: '#' + b.tool, class: 'small' }, 'Open the ' + (TOOL[b.tool] ? TOOL[b.tool][0] : 'Part A quiz') + ' →')),
+      h('p', { class: 'muted', style: 'margin:0' }, b.why),
+      b.items.map((it, j) => { const key = b.id + j; const span = h('span', { class: done[key] ? 'done' : '' }, it);
+        return h('label', { class: 'check' }, h('input', { type: 'checkbox', id: 'c-' + key, checked: !!done[key], onchange: e => { done[key] = e.target.checked; span.className = e.target.checked ? 'done' : ''; store.set('plan', done); upd(); } }), span); }));
+    root.append(sec);
+  });
+  upd();
+  root.append(h('section', {}, h('h2', {}, 'Answer skeletons'), h('p', { class: 'muted' }, 'A sequence that keeps the marker looking for working. This is my layout, not an official marking scheme.'),
+    D.templates.map(t => h('details', {}, h('summary', {}, t.name), h('div', { class: 'body' }, h('ol', {}, t.steps.map(s => h('li', {}, s))))))));
+  const cl = D.facts.closure;
+  root.append(h('section', { class: 'card' }, h('h2', {}, 'Quick facts for Part A'),
+    h('div', { class: 'grid2' },
+      h('div', {}, h('h3', {}, 'Closure properties'), table(['Class', ...cl.cols], cl.rows.map(r => [r[0], ...r.slice(1).map(v => v ? h('span', { class: 'ok' }, 'yes') : h('span', { class: 'no' }, 'no'))]), { numCols: [1, 2, 3, 4, 5] })),
+      h('div', {}, h('h3', {}, 'Chomsky hierarchy'), table(['Type', 'Grammar', 'Machine'], D.facts.hierarchy))),
+    h('h3', { style: 'margin-top:14px' }, 'One-liners that were asked as MCQs'),
+    table(['Term', 'Answer'], D.facts.oneLiners)));
+  root.append(h('section', {}, h('h2', {}, 'One-page theory notes'), D.theory.map(t => h('details', {}, h('summary', {}, t.title), h('div', { class: 'body' }, t.body.map(p => h('p', {}, p)))))));
+  return root;
+}
+
+/* ---------- Automata lab ---------- */
+function labText(key, def) { if (S.texts[key] === undefined) S.texts[key] = def; return S.texts[key]; }
+function textArea(key, def, rows) {
+  const t = h('textarea', { id: 'ta-' + key, rows: rows || 9, spellcheck: 'false', 'aria-label': 'Machine definition' });
+  t.value = labText(key, def); t.addEventListener('input', () => { S.texts[key] = t.value; }); return t;
+}
+function setTA(key, v) { S.texts[key] = v; const t = $('#ta-' + key); if (t) t.value = v; }
+function renameStates(states) { const L = {}; states.forEach((s, i) => { L[s] = String.fromCharCode(65 + i % 26) + (i >= 26 ? Math.floor(i / 26) : ''); }); return L; }
+function dfaText(d, L) {
+  const lines = ['start: ' + L[d.start], 'final: ' + d.finals.map(s => L[s]).join(' ')];
+  for (const s of d.states) for (const a of d.alphabet) lines.push(L[s] + ' ' + a + ' -> ' + L[d.delta[s][a]]);
+  return lines.join('\n');
+}
+function viewFA() {
+  const root = h('div', { class: 'view' });
+  root.append(h('section', { class: 'hero' }, h('div', { class: 'eyebrow' }, 'Unit 1 and 2 · finite automata'), h('h1', {}, 'Automata lab'),
+    h('p', { class: 'lede' }, 'Load a machine from a past paper or type your own. Each tool shows the working in the order you would write it in the exam.'),
+    seg([['nfa', 'NFA → DFA'], ['min', 'Minimize a DFA'], ['mm', 'Mealy / Moore']], S.faSub, v => { S.faSub = v; render(); })));
+  root.append(S.faSub === 'nfa' ? labNFA() : S.faSub === 'min' ? labMin() : labMM());
+  return root;
+}
+function labNFA() {
+  const wrap = h('div', { class: 'lab' }), out = h('div', { class: 'lab' });
+  const first = P.nfa[selIndex('nfa-preset')];
+  const ta = textArea('nfa', first.text, 12);
+  const tests = h('input', { type: 'text', id: 'nfa-tests', value: S.texts.nfaTests === undefined ? first.tests.join(' ') : S.texts.nfaTests, 'aria-label': 'Test strings' });
+  tests.addEventListener('input', () => { S.texts.nfaTests = tests.value; });
+  const sel = presetSelect('nfa-preset', P.nfa, p => { setTA('nfa', p.text); tests.value = p.tests.join(' '); S.texts.nfaTests = tests.value; run(); });
+  const run = () => {
+    out.replaceChildren();
+    let fa, r;
+    try { fa = F.parseFA(S.texts.nfa); r = F.nfaToDfa(fa); } catch (e) { out.append(err(e)); return; }
+    const L = {}; r.states.forEach((s, i) => { L[s.name] = String.fromCharCode(65 + i); });
+    const dd = r.dfa;
+    if (fa.hasEps) out.append(stage('Step 1 · ε-closure of each state', table(['State', 'ε-closure'], fa.states.map(s => [s, '{' + F.epsClosure(fa, [s]).join(', ') + '}']), { monoCols: [0, 1] })));
+    out.append(stage((fa.hasEps ? 'Step 2' : 'Step 1') + ' · subset construction', h('p', { class: 'small muted' }, 'Start state: ' + (fa.hasEps ? 'ε-closure of ' + fa.start + ' = ' : '') + r.nameOf(r.startSet) + '. A subset is final if it contains a final NFA state (marked *).'),
+      table(['Name', 'DFA state', ...fa.alphabet.map(a => 'on ' + a)], r.states.map(s => {
+        const row = r.rows.filter(x => r.nameOf(x.from) === s.name);
+        return [(s.name === dd.start ? '→ ' : '') + (s.final ? '* ' : '') + L[s.name], s.name, ...fa.alphabet.map(a => { const x = row.find(y => y.sym === a); return fa.hasEps ? r.nameOf(x.move) + ' → ' + L[r.nameOf(x.to)] + ' ' + r.nameOf(x.to) : L[r.nameOf(x.to)] + '  ' + r.nameOf(x.to); })];
+      }), { monoCols: [0, 1, ...fa.alphabet.map((_, i) => i + 2)] })));
+    out.append(h('div', { class: 'grid2' }, h('div', {}, h('h3', { style: 'margin-bottom:6px' }, 'NFA'), faGraph(fa)), h('div', {}, h('h3', { style: 'margin-bottom:6px' }, 'DFA (' + dd.states.length + ' states)'), dfaGraph(dd, L))));
+    const strs = (tests.value || '').split(/\s+/).filter(Boolean);
+    const rows = strs.map(s => { const a = F.runNFA(fa, s), b = F.runDFA(dd, s); return [s, a.accepted ? h('span', { class: 'pill ok' }, 'accepted') : h('span', { class: 'pill no' }, 'rejected'), b.accepted ? h('span', { class: 'pill ok' }, 'accepted') : h('span', { class: 'pill no' }, 'rejected'), b.path.map(x => L[x]).join(' → ')]; });
+    if (rows.length) out.append(stage('Test strings', table(['String', 'NFA', 'DFA', 'DFA path'], rows, { monoCols: [0, 3] })));
+    let agree = 0, total = 0;
+    const alpha = fa.alphabet;
+    let layer = ['']; for (let k = 0; k <= 7; k++) { for (const s of layer) { total++; if (F.runNFA(fa, s).accepted === F.runDFA(dd, s).accepted) agree++; } layer = [].concat(...layer.map(s => alpha.map(a => s + a))); if (layer.length > 3000) break; }
+    out.append(h('p', { class: 'small' }, agree === total ? h('span', { class: 'ok' }, 'Cross-check passed: ') : h('span', { class: 'no' }, 'Mismatch: '), 'NFA and DFA agree on ' + agree + ' of ' + total + ' strings (all strings up to the length tried).'));
+    out.append(h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', onclick: () => { const rl = renameStates(dd.states); S.texts.min = dfaText(dd, rl); S.texts.minTests = ''; S.faSub = 'min'; render(); } }, 'Minimize this DFA →')));
+  };
+  wrap.append(h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'nfa-preset' }, 'Load from a paper'), sel)),
+    h('div', { class: 'field' }, h('label', { for: 'ta-nfa' }, 'NFA (one transition per line: state symbol -> targets). Type ε for ε-moves.'), ta),
+    h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'nfa-tests' }, 'Test strings (space separated; use ε-free strings)'), tests), h('button', { class: 'btn primary', type: 'button', onclick: run }, 'Convert to DFA'), h('button', { class: 'btn', type: 'button', onclick: () => { setTA('nfa', 'start: q0\nfinal: q1\nq0 a -> q0 q1\nq0 b -> q0\nq1 a ->\nq1 b ->'); run(); } }, 'Tiny example')), out);
+  run();
+  return wrap;
+}
+function labMin() {
+  const wrap = h('div', { class: 'lab' }), out = h('div', { class: 'lab' });
+  const m0 = P.dfa[selIndex('min-preset')];
+  const ta = textArea('min', m0.text, 14);
+  const tests = h('input', { type: 'text', id: 'min-tests', value: S.texts.minTests === undefined ? m0.tests.join(' ') : S.texts.minTests, 'aria-label': 'Test strings' });
+  tests.addEventListener('input', () => { S.texts.minTests = tests.value; });
+  const sel = presetSelect('min-preset', P.dfa, p => { setTA('min', p.text); tests.value = p.tests.join(' '); S.texts.minTests = tests.value; run(); });
+  const run = () => {
+    out.replaceChildren();
+    let d, m;
+    try { d = F.faToDfaObj(F.parseFA(S.texts.min)); m = F.minimizeDFA(d); } catch (e) { out.append(err(e)); return; }
+    out.append(stage('Step 1 · clean up', h('p', { class: 'small' }, (m.removed.length ? 'Unreachable states removed: ' + m.removed.join(', ') + '. ' : 'Every state is reachable. ') + (m.trapAdded ? 'Some transitions were missing, so a dead state "' + m.trapAdded + '" was added. ' : 'The DFA is complete. ') + 'Working with ' + m.states.length + ' states.')));
+    const R = m.states;
+    if (R.length > 1) {
+      const rows = [];
+      for (let i = 1; i < R.length; i++) rows.push([R[i], ...R.slice(0, i).map(p => { const k = m.pk(R[i], p), mk = m.marks.get(k); return mk ? h('span', { class: 'mkcell', 'data-m': 1 }, String(mk.round)) : '≡'; })]);
+      const t = table(['', ...R.slice(0, R.length - 1)], rows, { cls: 'pairs' });
+      t.querySelectorAll('tbody tr').forEach(tr => [...tr.children].forEach((td, i) => { if (i === 0) return; td.className = td.textContent === '≡' ? 'eq' : 'mk'; }));
+      t.querySelectorAll('tbody tr').forEach(tr => { [...tr.children].forEach((td, i) => { if (i === 0) td.style.fontWeight = '600'; }); });
+      out.append(stage('Step 2 · table filling', h('p', { class: 'small muted' }, 'Number = the round in which the pair was marked as distinguishable (0 = one is final and one is not). ≡ means never marked, so the two states are equivalent.'), t));
+      const lines = [];
+      for (let r = 0; r <= m.rounds; r++) { const ps = [...m.marks.entries()].filter(([, v]) => v.round === r); if (ps.length) lines.push('Round ' + r + ':\n' + ps.map(([k, v]) => '  (' + k.replace('|', ', ') + ')  ' + v.reason).join('\n')); }
+      out.append(stage('Why each pair was marked', pre(lines.join('\n'))));
+    }
+    out.append(stage('Step 3 · equivalence classes', h('p', {}, m.classes.map(c => '{' + c.join(', ') + '}').join('   ')), h('p', { class: 'small muted' }, R.length + ' states reduce to ' + m.min.states.length + '.')));
+    out.append(stage('Minimal DFA', dfaTable(m.min), dfaGraph(m.min)));
+    let ok = 0, tot = 0, layer = ['']; for (let k = 0; k <= 7; k++) { for (const s of layer) { tot++; if (F.runDFA(d, s).accepted === F.runDFA(m.min, s).accepted) ok++; } layer = [].concat(...layer.map(s => d.alphabet.map(a => s + a))); if (layer.length > 3000) break; }
+    out.append(h('p', { class: 'small' }, ok === tot ? h('span', { class: 'ok' }, 'Cross-check passed: ') : h('span', { class: 'no' }, 'Mismatch: '), 'the original and minimal DFA agree on ' + ok + ' of ' + tot + ' strings.'));
+    const strs = (tests.value || '').split(/\s+/).filter(Boolean);
+    if (strs.length) out.append(stage('Test strings', table(['String', 'Original', 'Minimal'], strs.map(s => [s, F.runDFA(d, s).accepted ? 'accepted' : 'rejected', F.runDFA(m.min, s).accepted ? 'accepted' : 'rejected']), { monoCols: [0] })));
+  };
+  wrap.append(h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'min-preset' }, 'Load from a paper'), sel)),
+    h('div', { class: 'field' }, h('label', { for: 'ta-min' }, 'DFA (one transition per line, one target each)'), ta),
+    h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'min-tests' }, 'Test strings'), tests), h('button', { class: 'btn primary', type: 'button', onclick: run }, 'Minimize')), out);
+  run();
+  return wrap;
+}
+function labMM() {
+  const wrap = h('div', { class: 'lab' });
+  wrap.append(seg([['mealy', 'Mealy machine'], ['moore', 'Moore machine']], S.mmSub, v => { S.mmSub = v; render(); }));
+  const out = h('div', { class: 'lab' });
+  const isMealy = S.mmSub === 'mealy', list = isMealy ? P.mealy : P.moore, key = isMealy ? 'mealy' : 'moore';
+  const l0 = list[selIndex('mm-preset')] || list[0];
+  const ta = textArea(key, l0.text, 11);
+  const inp = h('input', { type: 'text', id: 'mm-in', value: S.texts[key + 'In'] === undefined ? l0.test : S.texts[key + 'In'], 'aria-label': 'Input string' });
+  inp.addEventListener('input', () => { S.texts[key + 'In'] = inp.value; });
+  const init = h('select', { id: 'mm-init' }, ['0', '1', 'a', 'b', 'ε-free default'].slice(0, 4).map(x => h('option', { value: x }, x)));
+  const sel = presetSelect('mm-preset', list, p => { setTA(key, p.text); inp.value = p.test; S.texts[key + 'In'] = p.test; run(); });
+  const graphMealy = m => { const edges = []; for (const s of m.states) for (const a of m.alphabet) { const t = m.delta[s] && m.delta[s][a]; if (t) edges.push({ from: s, to: t[0], label: a + '/' + t[1] }); } return svgGraph({ nodes: m.states.map(s => ({ id: s, label: s, start: s === m.start })), edges }); };
+  const graphMoore = m => { const edges = []; for (const s of m.states) for (const a of m.alphabet) { const t = m.delta[s] && m.delta[s][a]; if (t) edges.push({ from: s, to: t, label: a }); } return svgGraph({ nodes: m.states.map(s => ({ id: s, label: s.includes('/') ? s : s + '/' + m.out[s], start: s === m.start })), edges }); };
+  const mealyTable = m => table(['State', ...m.alphabet.map(a => 'on ' + a + ' → next / out')], m.states.map(s => [(s === m.start ? '→ ' : '') + s, ...m.alphabet.map(a => { const t = m.delta[s] && m.delta[s][a]; return t ? t[0] + ' / ' + t[1] : '–'; })]), { monoCols: [0, ...m.alphabet.map((_, i) => i + 1)] });
+  const mooreTable = m => table(['State', 'Output', ...m.alphabet.map(a => 'on ' + a)], m.states.map(s => [(s === m.start ? '→ ' : '') + s, m.out[s], ...m.alphabet.map(a => (m.delta[s] && m.delta[s][a]) || '–')]), { monoCols: [0, 1, ...m.alphabet.map((_, i) => i + 2)] });
+  const run = () => {
+    out.replaceChildren();
+    try {
+      if (isMealy) {
+        const m = F.parseMealy(S.texts.mealy), r = F.runMealy(m, inp.value.trim());
+        out.append(stage('Run the Mealy machine', r.error ? err(new Error(r.error)) : [table(['Step', 'From', 'Input', 'To', 'Output'], r.steps.map((s, i) => [i + 1, s.from, s.sym, s.to, s.out]), { monoCols: [1, 2, 3, 4] }), h('p', {}, 'Output string: ', h('b', { class: 'mono' }, r.out || 'ε'), '  (one output symbol per input symbol)')]));
+        out.append(h('div', { class: 'grid2' }, h('div', {}, mealyTable(m)), graphMealy(m)));
+        const io = init.value, c = F.mealyToMoore(m, io);
+        out.append(stage('Mealy → Moore', h('p', { class: 'small muted' }, 'Each Mealy state q is split into one Moore state q/o for every output o that arrives at q. The start state gets the initial output chosen below (' + io + ').'),
+          table(['Mealy state', 'Outputs on incoming edges', 'Moore states'], m.states.map(s => [s, c.incoming[s].join(', ') || '(none)', c.moore.states.filter(x => x.split('/')[0] === s).join('  ') || '(unreachable)']), { monoCols: [0, 1, 2] }),
+          mooreTable(c.moore), graphMoore(c.moore)));
+        let ok = 0, tot = 0, layer = ['']; for (let k = 0; k <= 6; k++) { for (const s of layer) { tot++; if (F.runMoore(c.moore, s).out === io + F.runMealy(m, s).out) ok++; } layer = [].concat(...layer.map(s => m.alphabet.map(a => s + a))); }
+        out.append(h('p', { class: 'small' }, ok === tot ? h('span', { class: 'ok' }, 'Cross-check passed: ') : h('span', { class: 'no' }, 'Mismatch: '), 'Moore output equals the initial output followed by the Mealy output on ' + ok + ' of ' + tot + ' strings.'));
+      } else {
+        const m = F.parseMoore(S.texts.moore), r = F.runMoore(m, inp.value.trim());
+        out.append(stage('Run the Moore machine', r.error ? err(new Error(r.error)) : [table(['Step', 'From', 'Input', 'To', 'Output of new state'], [[0, '', '', m.start, m.out[m.start]], ...r.steps.map((s, i) => [i + 1, s.from, s.sym, s.to, s.out])], { monoCols: [1, 2, 3, 4] }), h('p', {}, 'Output string: ', h('b', { class: 'mono' }, r.out), '  (one symbol longer than the input, because the start state also prints)')]));
+        out.append(h('div', { class: 'grid2' }, h('div', {}, mooreTable(m)), graphMoore(m)));
+        const me = F.mooreToMealy(m);
+        out.append(stage('Moore → Mealy', h('p', { class: 'small muted' }, 'Each transition prints the output of the state it enters. The start state output is dropped.'), mealyTable(me), graphMealy(me)));
+        let ok = 0, tot = 0, layer = ['']; for (let k = 0; k <= 6; k++) { for (const s of layer) { tot++; if (F.runMoore(m, s).out.slice(1) === F.runMealy(me, s).out) ok++; } layer = [].concat(...layer.map(s => m.alphabet.map(a => s + a))); }
+        out.append(h('p', { class: 'small' }, ok === tot ? h('span', { class: 'ok' }, 'Cross-check passed: ') : h('span', { class: 'no' }, 'Mismatch: '), 'Mealy output equals the Moore output without its first symbol on ' + ok + ' of ' + tot + ' strings.'));
+      }
+    } catch (e) { out.append(err(e)); }
+  };
+  wrap.append(h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'mm-preset' }, 'Load from a paper'), sel)),
+    h('div', { class: 'field' }, h('label', { for: 'ta-' + key }, isMealy ? 'Mealy machine: state input -> next output' : 'Moore machine: outputs on an  out:  line, transitions state input -> next'), ta),
+    h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'mm-in' }, 'Input string'), inp),
+      isMealy ? h('div', { class: 'field' }, h('label', { for: 'mm-init' }, 'Initial output for Moore start'), init) : null,
+      h('button', { class: 'btn primary', type: 'button', onclick: run }, isMealy ? 'Run and convert to Moore' : 'Run and convert to Mealy')), out);
+  run();
+  return wrap;
+}
+
+/* ---------- Grammar lab ---------- */
+function viewGram() {
+  const root = h('div', { class: 'view' }), out = h('div', { class: 'lab' });
+  root.append(h('section', { class: 'hero' }, h('div', { class: 'eyebrow' }, 'Unit 2 · context-free grammars'), h('h1', {}, 'Grammar lab'),
+    h('p', { class: 'lede' }, 'Simplify, convert to Chomsky or Greibach normal form, derive a string, or look for an ambiguity. Every step is printed so you can copy the method.')));
+  const g0 = P.grammar[selIndex('g-preset', 1)];
+  const ta = textArea('gram', g0.text, 8), str = h('input', { type: 'text', id: 'g-str', value: S.texts.gStr === undefined ? (g0.words || '') : S.texts.gStr, 'aria-label': 'String to test' });
+  str.addEventListener('input', () => { S.texts.gStr = str.value; });
+  const keep = h('input', { type: 'checkbox', id: 'g-keep', checked: true }), viaCnf = h('input', { type: 'checkbox', id: 'g-via' });
+  const sel = presetSelect('g-preset', P.grammar, p => { setTA('gram', p.text); str.value = p.words || ''; S.texts.gStr = str.value; out.replaceChildren(); }, 1);
+  const gstage = (title, note, g) => stage(title, note ? h('p', { class: 'small muted' }, note) : null, pre(F.grammarText(g)));
+  const get = () => F.parseGrammar(S.texts.gram);
+  const simp = () => F.simplify(get(), keep.checked);
+  const verify = (g0, test) => {
+    const g = get(); if (g.word) return null;
+    const alpha = [...new Set([].concat(...g.nts.map(A => [].concat(...g.P[A].map(r => r.filter(t => !F.isNT(t)))))))].slice(0, 3);
+    let ok = 0, tot = 0, layer = [''];
+    for (let k = 1; k <= 6; k++) { layer = [].concat(...layer.map(s => alpha.map(a => s + a))); for (const s of layer) { tot++; if (F.cykAccepts(g, [...s]) === test([...s])) ok++; } }
+    return h('p', { class: 'small' }, ok === tot ? h('span', { class: 'ok' }, 'Cross-check passed: ') : h('span', { class: 'no' }, 'Mismatch: '), 'the result accepts the same ' + tot + ' non-empty strings as the original (up to length 6, parser cross-check).');
+  };
+  const act = fn => () => { out.replaceChildren(); try { fn(); } catch (e) { out.append(err(e)); } };
+  const bSimp = act(() => { const g = get(), r = simp(); out.append(gstage('Given', null, g)); r.log.forEach(l => out.append(gstage(l.title, l.note, l.g))); out.append(gstage('Simplified grammar', r.startNullable && keep.checked ? 'ε is in the language, so S → ε is kept.' : null, r.g)); });
+  const bCnf = act(() => { const g = get(), r = simp(); out.append(gstage('Given', null, g)); r.log.forEach(l => out.append(gstage(l.title, l.note, l.g))); const c = F.toCNF(r.g); out.append(gstage('Chomsky normal form', 'Terminals inside longer rules get a variable Cₐ → a. Rules longer than 2 symbols are split with variables D1, D2, …', c)); const v = verify(g, w => F.cnfAccepts(c, w)); if (v) out.append(v); });
+  const bGnf = act(() => { const g = get(); let r = simp(); out.append(gstage('Given', null, g)); r.log.forEach(l => out.append(gstage(l.title, l.note, l.g))); let base = r.g;
+    if (viaCnf.checked) { base = F.toCNF(r.g); out.append(gstage('Chomsky normal form (first)', null, base)); }
+    const hasEps = base.P[base.start] && base.P[base.start].some(x => !x.length); const clean = JSON.parse(JSON.stringify(base)); clean.P[clean.start] = clean.P[clean.start].filter(x => x.length);
+    const gn = F.toGNF(clean); gn.log.forEach(l => out.append(gstage(l.title, l.note, l.g))); out.append(gstage('Greibach normal form', hasEps ? 'S → ε is not shown. Add it back only if ε must be in the language and S never appears on a right side.' : 'Every rule is A → aα with a terminal a and α a string of variables.', gn.g)); const v = verify(g, w => F.gnfAccepts(gn.g, w)); if (v) out.append(v); });
+  const bDer = act(() => { const g = get(), w = str.value.trim(); const d = F.derive(g, w); if (!d) { out.append(stage('Leftmost derivation', h('p', {}, 'No derivation found for "' + w + '". Either it is not in the language, or it needs a longer search than this tool does.'))); return; }
+    const fm = f => f.length ? (g.word ? f.join(' ') : f.join('')) : 'ε';
+    out.append(stage('Leftmost derivation of "' + (w || 'ε') + '"', pre(d.forms.map((f, i) => (i ? '⇒ ' : '  ') + fm(f) + (i ? '        [' + d.rules[i - 1].lhs + ' → ' + F.fmtRHS(d.rules[i - 1].rhs) + ']' : '')).join('\n'))));
+    out.append(stage('Parse tree', pre(F.treeText(F.buildTree(g, d.rules, g.start))))); });
+  const bAmb = act(() => { const g = get(), w = F.findAmbiguity(g, 6, { ms: 3000 });
+    if (!w) out.append(stage('Ambiguity check', h('p', {}, 'No string up to length 6 has two different leftmost derivations. That suggests the grammar is unambiguous, but it is not a proof.')));
+    else if (w.timedOut) out.append(stage('Ambiguity check', h('p', {}, 'The search ran out of time. Try a smaller grammar.')));
+    else { const fm = f => f.length ? (g.word ? f.join(' ') : f.join('')) : 'ε'; out.append(stage('Ambiguous: "' + w.string + '" has two leftmost derivations', pre('Derivation 1\n' + w.d1.map((f, i) => (i ? '⇒ ' : '  ') + fm(f)).join('\n')), pre('Derivation 2\n' + w.d2.map((f, i) => (i ? '⇒ ' : '  ') + fm(f)).join('\n')), h('p', { class: 'small muted' }, 'Two different leftmost derivations of one string are two different parse trees, which is the definition of ambiguity.'))); } });
+  const bMem = act(() => { const g = get(), w = F.tokInput(str.value); const ok = F.cykAccepts(g, w); out.append(stage('Membership', h('p', {}, '"' + (str.value.trim() || 'ε') + '" ', ok ? h('span', { class: 'pill ok' }, 'is generated') : h('span', { class: 'pill no' }, 'is not generated'), ' by the grammar (CYK on its CNF).'))); });
+  root.append(h('div', { class: 'lab' }, h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'g-preset' }, 'Load from a paper'), sel)),
+    h('div', { class: 'field' }, h('label', { for: 'ta-gram' }, 'Grammar. One variable per line, alternatives with |. Capital letters are variables, ε is the empty string. For multi-letter symbols separate with spaces.'), ta),
+    h('div', { class: 'toolbar' }, h('label', { class: 'check', for: 'g-keep' }, keep, h('span', {}, 'Keep S → ε if ε is in the language')), h('label', { class: 'check', for: 'g-via' }, viaCnf, h('span', {}, 'GNF: go through CNF first'))),
+    h('div', { class: 'toolbar' }, h('button', { class: 'btn primary', type: 'button', onclick: bSimp }, 'Simplify'), h('button', { class: 'btn primary', type: 'button', onclick: bCnf }, 'To CNF'), h('button', { class: 'btn primary', type: 'button', onclick: bGnf }, 'To GNF'), h('button', { class: 'btn', type: 'button', onclick: bAmb }, 'Check ambiguity')),
+    h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'g-str' }, 'String (letters together, or words separated by spaces)'), str), h('button', { class: 'btn', type: 'button', onclick: bDer }, 'Leftmost derivation + tree'), h('button', { class: 'btn', type: 'button', onclick: bMem }, 'Is it generated?')), out));
+  return root;
+}
+
+/* ---------- PDA lab ---------- */
+function pdaTrace(pda, w) {
+  const r = F.simulatePDA(pda, w);
+  const box = h('div', { class: 'lab' });
+  const fmtSt = s => s.length ? s.join('') : 'ε';
+  if (!r.accepted) { box.append(h('p', {}, h('span', { class: 'pill no' }, 'rejected'), ' no sequence of moves consumes the whole input and accepts (' + r.explored + ' configurations explored' + (r.truncated ? ', search limit reached' : '') + ').')); return box; }
+  const rows = r.path.map((c, i) => [i, i ? 'δ(' + c.via.q + ', ' + c.via.a + ', ' + c.via.X + ') → (' + c.via.p + ', ' + fmtSt(c.via.push) + ')' : 'start', c.q, c.i >= F.tokInput(w).length ? 'ε' : F.tokInput(w).slice(c.i).join(''), fmtSt(c.st)]);
+  box.append(h('p', {}, h('span', { class: 'pill ok' }, 'accepted'), ' in ' + (r.path.length - 1) + ' moves. Stack is written top first.'));
+  box.append(table(['#', 'Move', 'State', 'Input left', 'Stack'], rows, { monoCols: [1, 2, 3, 4] }));
+  return box;
+}
+function viewPDA() {
+  const root = h('div', { class: 'view' });
+  root.append(h('section', { class: 'hero' }, h('div', { class: 'eyebrow' }, 'Unit 3 · pushdown automata'), h('h1', {}, 'PDA lab'),
+    h('p', { class: 'lede' }, 'Run a PDA on a string and read the move-by-move trace, or turn any grammar into a PDA and trace a string through it.')));
+  const out1 = h('div', { class: 'lab' }), out2 = h('div', { class: 'lab' });
+  const p0 = P.pda[selIndex('pda-preset')];
+  const ta1 = textArea('pda', p0.text, 11);
+  const in1 = h('input', { type: 'text', id: 'pda-in', value: S.texts.pdaIn === undefined ? p0.tests[0] : S.texts.pdaIn, 'aria-label': 'Input string' });
+  in1.addEventListener('input', () => { S.texts.pdaIn = in1.value; });
+  const quick1 = h('div', { class: 'row' });
+  const setQuick = p => { quick1.replaceChildren(h('span', { class: 'small muted' }, 'Try:'), ...p.tests.map(t => h('button', { class: 'btn', type: 'button', onclick: () => { in1.value = t; S.texts.pdaIn = t; run1(); } }, t || 'ε'))); };
+  setQuick(p0);
+  const sel1 = presetSelect('pda-preset', P.pda, p => { setTA('pda', p.text); in1.value = p.tests[0]; S.texts.pdaIn = in1.value; setQuick(p); run1(); });
+  const run1 = () => { out1.replaceChildren(); try { out1.append(pdaTrace(F.parsePDA(S.texts.pda), in1.value.trim())); } catch (e) { out1.append(err(e)); } };
+  root.append(h('section', { class: 'card lab' }, h('h2', {}, 'Run a PDA'),
+    h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'pda-preset' }, 'Load from a paper'), sel1)),
+    h('div', { class: 'field' }, h('label', { for: 'ta-pda' }, 'One move per line:  state input top -> next push.  The push string is written top first. ε is the empty input or push. Use  final:  or  accept: empty.'), ta1),
+    h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'pda-in' }, 'Input string'), in1), h('button', { class: 'btn primary', type: 'button', onclick: run1 }, 'Run')), quick1, out1));
+  const c0 = P.cfg2pda[selIndex('cp-preset')];
+  const ta2 = textArea('cfgpda', c0.text, 6);
+  const in2 = h('input', { type: 'text', id: 'cp-in', value: S.texts.cpIn === undefined ? c0.tests[0] : S.texts.cpIn, 'aria-label': 'Input string' });
+  in2.addEventListener('input', () => { S.texts.cpIn = in2.value; });
+  const quick2 = h('div', { class: 'row' });
+  const setQuick2 = p => { quick2.replaceChildren(h('span', { class: 'small muted' }, 'Try:'), ...p.tests.map(t => h('button', { class: 'btn', type: 'button', onclick: () => { in2.value = t; S.texts.cpIn = t; run2(); } }, t))); };
+  setQuick2(c0);
+  const sel2 = presetSelect('cp-preset', P.cfg2pda, p => { setTA('cfgpda', p.text); in2.value = p.tests[0]; S.texts.cpIn = in2.value; setQuick2(p); run2(); });
+  const run2 = () => { out2.replaceChildren(); try { const g = F.parseGrammar(S.texts.cfgpda), pda = F.cfgToPDA(g);
+      out2.append(stage('Construction', h('p', { class: 'small muted' }, 'Push S above Z₀. For every rule A → α add δ(q1, ε, A) = (q1, α). For every terminal a add δ(q1, a, a) = (q1, ε). When Z₀ is back on top move to the final state.'), pre(F.pdaText(pda))));
+      out2.append(stage('Trace of "' + (in2.value.trim() || 'ε') + '"', pdaTrace(pda, in2.value.trim()))); } catch (e) { out2.append(err(e)); } };
+  root.append(h('section', { class: 'card lab' }, h('h2', {}, 'Context-free grammar to PDA'),
+    h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'cp-preset' }, 'Load from a paper'), sel2)),
+    h('div', { class: 'field' }, h('label', { for: 'ta-cfgpda' }, 'Grammar'), ta2),
+    h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'cp-in' }, 'Input string'), in2), h('button', { class: 'btn primary', type: 'button', onclick: run2 }, 'Build PDA and trace')), quick2, out2));
+  run1(); run2();
+  return root;
+}
+
+/* ---------- Turing lab ---------- */
+function viewTM() {
+  const root = h('div', { class: 'view' });
+  root.append(h('section', { class: 'hero' }, h('div', { class: 'eyebrow' }, 'Unit 4 · Turing machines'), h('h1', {}, 'Turing lab'),
+    h('p', { class: 'lede' }, 'Eight machines taken from the papers. Watch the tape, step through, and copy the transition table. B is the blank. Edit any line and run it again.')));
+  const t0 = P.tm[selIndex('tm-preset')];
+  const ta = textArea('tm', t0.text, 18);
+  const inp = h('input', { type: 'text', id: 'tm-in', value: S.texts.tmIn === undefined ? t0.tests[0] : S.texts.tmIn, 'aria-label': 'Tape input' });
+  inp.addEventListener('input', () => { S.texts.tmIn = inp.value; });
+  const quick = h('div', { class: 'row' });
+  const tapeEl = h('div', { class: 'tape', role: 'img', 'aria-label': 'Tape' }), stateEl = h('span', { class: 'statebox' }), statusEl = h('span', {}), explain = h('div', { class: 'explain' }), stepEl = h('b', { class: 'mono' });
+  const idsEl = h('div', { class: 'ids' }), tableBox = h('div', {}), errBox = h('div', {});
+  let cfgs = [], idx = 0, result = null, tm = null;
+  const sel = presetSelect('tm-preset', P.tm, p => { setTA('tm', p.text); inp.value = p.tests[0]; S.texts.tmIn = inp.value; setQuick(p); load(); });
+  const go = t => { inp.value = t; S.texts.tmIn = t; load(); };
+  const setQuick = p => quick.replaceChildren(h('span', { class: 'small muted' }, 'Try:'), ...p.tests.map(t => h('button', { class: 'btn', type: 'button', onclick: () => go(t) }, t)));
+  setQuick(t0);
+  const draw = () => {
+    const c = cfgs[idx]; if (!c) return;
+    const pad = 4, cells = c.tape.slice(); const blank = tm.blank;
+    const left = Math.max(0, pad - c.head), right = Math.max(0, pad - (cells.length - 1 - c.head));
+    const all = Array(left).fill(blank).concat(cells, Array(right).fill(blank)), hd = c.head + left;
+    tapeEl.replaceChildren(...all.map((ch, i) => h('div', { class: 'cell' + (i === hd ? ' head' : '') + (ch === blank ? ' blank' : '') }, ch === blank ? '·' : ch)));
+    const hc = tapeEl.querySelector('.head'); if (hc && hc.scrollIntoView) { const box = tapeEl.getBoundingClientRect(), r = hc.getBoundingClientRect(); tapeEl.scrollLeft += (r.left + r.width / 2) - (box.left + box.width / 2); }
+    stateEl.textContent = 'state ' + c.state; stepEl.textContent = 'step ' + idx + ' of ' + (cfgs.length - 1); explain.textContent = idx ? c.note : 'start: head on the first symbol';
+    const last = idx === cfgs.length - 1;
+    statusEl.replaceChildren(last ? (result.status === 'accepted' ? h('span', { class: 'pill ok' }, 'accepted') : result.status === 'rejected' ? h('span', { class: 'pill no' }, 'halted, no move (reject)') : h('span', { class: 'pill run' }, 'step limit reached')) : h('span', { class: 'pill run' }, 'running'));
+    const start = Math.max(0, Math.min(idx - 12, cfgs.length - 40));
+    idsEl.replaceChildren(...cfgs.slice(start, start + 40).map((cc, i) => h('div', { class: start + i === idx ? 'cur' : '' }, String(start + i).padStart(3, ' ') + '  ' + F.idString(cc, blank))));
+  };
+  const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+  const load = () => {
+    stop(); errBox.replaceChildren(); tableBox.replaceChildren();
+    try { tm = F.parseTM(S.texts.tm); } catch (e) { errBox.append(err(e)); return; }
+    result = F.runTM(tm, inp.value.trim()); cfgs = result.configs; idx = 0; draw();
+    const rows = Object.entries(tm.trans).map(([k, v]) => { const [s, a] = k.split('\u0001'); return [s, a, v[0], v[1], v[2]]; });
+    tableBox.append(h('details', {}, h('summary', {}, 'Transition table (' + rows.length + ' rules)'), h('div', { class: 'body' }, table(['State', 'Read', 'Next', 'Write', 'Move'], rows, { monoCols: [0, 1, 2, 3, 4] }))));
+    if (result.status === 'accepted' || result.output) tableBox.append(h('p', { class: 'small' }, 'Tape contents when halted (blanks removed): ', h('b', { class: 'mono' }, result.output || '(empty)')));
+  };
+  const play = () => { stop(); if (idx >= cfgs.length - 1) idx = 0; const speed = +$('#tm-speed').value; timer = setInterval(() => { if (idx >= cfgs.length - 1) { stop(); return; } idx++; draw(); }, speed); };
+  root.append(h('div', { class: 'lab' },
+    h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'tm-preset' }, 'Machine'), sel)),
+    h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'tm-in' }, 'Tape input'), inp), h('button', { class: 'btn primary', type: 'button', onclick: load }, 'Load'), quick),
+    tapeEl,
+    h('div', { class: 'row' }, stateEl, stepEl, statusEl),
+    explain,
+    h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', onclick: () => { stop(); idx = 0; draw(); } }, '⏮ Reset'), h('button', { class: 'btn', type: 'button', onclick: () => { stop(); if (idx > 0) { idx--; draw(); } } }, '◀ Back'), h('button', { class: 'btn primary', type: 'button', onclick: () => { stop(); if (idx < cfgs.length - 1) { idx++; draw(); } } }, 'Step ▶'), h('button', { class: 'btn', type: 'button', onclick: play }, '▶ Play'), h('button', { class: 'btn', type: 'button', onclick: stop }, '⏸ Pause'), h('button', { class: 'btn', type: 'button', onclick: () => { stop(); idx = cfgs.length - 1; draw(); } }, 'Jump to end ⏭'),
+      h('div', { class: 'field', style: 'margin-left:8px' }, h('label', { for: 'tm-speed' }, 'Delay (ms)'), h('input', { type: 'range', id: 'tm-speed', min: 30, max: 700, value: 160 }))),
+    errBox,
+    h('div', { class: 'grid2' }, h('div', { class: 'field' }, h('label', { for: 'ta-tm' }, 'Machine definition:  state read -> next write move  (L, R or S). The accept: line lists halting states.'), ta),
+      h('div', { class: 'field' }, h('label', {}, 'Instantaneous descriptions (state in [brackets] sits before the scanned symbol)'), idsEl)),
+    tableBox));
+  load();
+  return root;
+}
+
+/* ---------- Undecidability lab ---------- */
+function viewUndec() {
+  const root = h('div', { class: 'view' });
+  root.append(h('section', { class: 'hero' }, h('div', { class: 'eyebrow' }, 'Unit 5 · undecidability and complexity'), h('h1', {}, 'Undecidability lab'),
+    h('p', { class: 'lede' }, 'Solve a Post Correspondence Problem instance with the overhang method, then read the one-page proofs the papers ask for.')));
+  const out = h('div', { class: 'lab' });
+  const first = P.pcp[selIndex('pcp-preset')];
+  const tileText = tl => tl.map(t => t[0] + ' ' + t[1]).join('\n');
+  const ta = textArea('pcp', tileText(first.tiles), 5);
+  const mp = h('input', { type: 'checkbox', id: 'pcp-m' });
+  const sel = presetSelect('pcp-preset', P.pcp, p => { setTA('pcp', tileText(p.tiles)); run(); });
+  const run = () => {
+    out.replaceChildren();
+    const tiles = S.texts.pcp.split(/\n/).map(l => l.trim().split(/\s+/)).filter(a => a.length === 2 && a[0]);
+    if (!tiles.length) { out.append(err(new Error('Enter one tile per line as: top bottom'))); return; }
+    out.append(table(['Tile', 'Top (list A)', 'Bottom (list B)'], tiles.map((t, i) => [i + 1, t[0], t[1]]), { monoCols: [1, 2] }));
+    const r = F.solvePCP(tiles, { mpcp: mp.checked });
+    if (r.found) {
+      let T = '', B = ''; const rows = r.seq.map((i, k) => { T += tiles[i - 1][0]; B += tiles[i - 1][1]; return [k + 1, i, tiles[i - 1][0], tiles[i - 1][1], T, B]; });
+      out.append(stage(mp.checked ? 'Solution that starts with tile 1 (MPCP)' : 'Solution found', h('p', {}, 'Sequence ', h('b', { class: 'mono' }, r.seq.join(', ')), ': both rows spell ', h('b', { class: 'mono' }, r.top), '.'), table(['Step', 'Tile', 'Top adds', 'Bottom adds', 'Top so far', 'Bottom so far'], rows, { monoCols: [2, 3, 4, 5] })));
+    } else {
+      const topLonger = tiles.every(t => t[0].length > t[1].length), botLonger = tiles.every(t => t[1].length > t[0].length);
+      out.append(stage('No solution found', h('p', {}, topLonger ? 'Every top string is longer than its bottom string, so the top row always stays ahead and the two rows can never be equal. There is no solution.' : botLonger ? 'Every bottom string is longer than its top string, so the bottom row always stays ahead. There is no solution.' : 'The search tried every sequence whose overhang stays consistent' + (r.exhausted ? ' and ran out of options, so within the length limits there is no solution.' : ' within its limits. PCP is undecidable, so failing to find one does not prove none exists.'))));
+    }
+  };
+  root.append(h('section', { class: 'card lab' }, h('h2', {}, 'PCP solver'),
+    h('div', { class: 'toolbar' }, h('div', { class: 'field' }, h('label', { for: 'pcp-preset' }, 'Load from a paper'), sel)),
+    h('div', { class: 'field' }, h('label', { for: 'ta-pcp' }, 'Tiles, one per line: top bottom'), ta),
+    h('div', { class: 'toolbar' }, h('label', { class: 'check', for: 'pcp-m' }, mp, h('span', {}, 'MPCP: the sequence must start with tile 1')), h('button', { class: 'btn primary', type: 'button', onclick: run }, 'Solve')), out,
+    h('p', { class: 'small muted' }, 'Two lists that I read from the scans (Nov 2025 and May 2025) may differ from your paper. Check the tiles before relying on the answer.')));
+  run();
+  root.append(h('section', {}, h('h2', {}, 'One-page proofs and definitions'), D.theory.filter(t => /Rice|Lₑ|Halting|PCP|Decidable|NP|variants|Pumping|regular sets|DPDA/.test(t.title)).map(t => h('details', {}, h('summary', {}, t.title), h('div', { class: 'body' }, t.body.map(p => h('p', {}, p)))))));
+  return root;
+}
+
+/* ---------- Quiz ---------- */
+function viewQuiz() {
+  const root = h('div', { class: 'view' });
+  const stats = store.get('quiz', {});
+  root.append(h('section', { class: 'hero' }, h('div', { class: 'eyebrow' }, 'Part A · 4 marks per unit'), h('h1', {}, 'Part A drill'),
+    h('p', { class: 'lede' }, D.quiz.length + ' real MCQs from the six papers, grouped by unit. Answers come with a one-line reason.')));
+  const area = h('div', {});
+  let filter = S.qUnit || 0;
+  const start = (pool) => {
+    const list = pool.slice().sort(() => Math.random() - 0.5); let i = 0, score = 0; const missed = [], per = {};
+    const show = () => {
+      area.replaceChildren();
+      if (i >= list.length) {
+        const rows = [1, 2, 3, 4, 5].filter(u => per[u]).map(u => h('div', { class: 'r' }, h('span', {}, 'Unit ' + u), h('div', { class: 'bar' }, h('i', { style: 'width:' + Math.round(100 * per[u][0] / per[u][1]) + '%' })), h('span', {}, per[u][0] + '/' + per[u][1])));
+        area.append(h('div', { class: 'card qbox' }, h('h2', {}, 'Score ' + score + ' of ' + list.length), h('div', { class: 'meter' }, rows),
+          h('div', { class: 'row' }, missed.length ? h('button', { class: 'btn primary', type: 'button', onclick: () => start(missed) }, 'Retry the ' + missed.length + ' you missed') : null, h('button', { class: 'btn', type: 'button', onclick: () => start(filter ? D.quiz.filter(q => q.u === filter) : D.quiz) }, 'Start again'))));
+        const st = store.get('quiz', {}); st.last = { score, total: list.length }; store.set('quiz', st); return;
+      }
+      const q = list[i]; let answered = false; let optsBox = null;
+      const opts = q.o.map((t, k) => h('button', { class: 'opt', type: 'button', onclick: () => {
+        if (answered) return; answered = true; per[q.u] = per[q.u] || [0, 0]; per[q.u][1]++;
+        const right = k === q.a; if (right) { score++; per[q.u][0]++; } else missed.push(q);
+        [...optsBox.children].forEach((b, j) => { b.disabled = true; if (j === q.a) b.classList.add('right'); else if (j === k) b.classList.add('wrong'); });
+        area.querySelector('.fb').replaceChildren(h('p', {}, h('b', { class: right ? 'ok' : 'no' }, right ? 'Correct. ' : 'Not quite. '), q.why), h('button', { class: 'btn primary', type: 'button', onclick: () => { i++; show(); } }, i + 1 >= list.length ? 'See score' : 'Next question'));
+      } }, t));
+      optsBox = h('div', { class: 'opts' }, opts);
+      area.append(h('div', { class: 'card qbox' }, h('div', { class: 'src' }, 'Question ' + (i + 1) + ' of ' + list.length + ' · Unit ' + q.u + ' · ' + q.src), h('h3', { style: 'font-family:var(--body);font-weight:500;font-size:17px;line-height:1.45' }, q.q), optsBox, h('div', { class: 'fb' })));
+    };
+    show();
+  };
+  root.append(h('div', { class: 'row' }, seg([[0, 'All units'], [1, 'Unit 1'], [2, 'Unit 2'], [3, 'Unit 3'], [4, 'Unit 4'], [5, 'Unit 5']], filter, v => { S.qUnit = v; filter = v; render(); }), h('button', { class: 'btn primary', type: 'button', onclick: () => start(filter ? D.quiz.filter(q => q.u === filter) : D.quiz) }, 'Start')));
+  if (stats.last) root.append(h('p', { class: 'small muted' }, 'Last round on this device: ' + stats.last.score + ' of ' + stats.last.total + '.'));
+  root.append(area);
+  return root;
+}
+
+/* ---------- router ---------- */
+const TABS = [['priority', 'Priorities', viewPriority], ['plan', 'Study plan', viewPlan], ['fa', 'Automata lab', viewFA], ['gram', 'Grammar lab', viewGram], ['pda', 'PDA lab', viewPDA], ['tm', 'Turing lab', viewTM], ['undec', 'Undecidability', viewUndec], ['quiz', 'Part A quiz', viewQuiz]];
+function current() { const id = (location.hash || '').slice(1); return TABS.find(t => t[0] === id) || TABS[0]; }
+function render() {
+  if (timer) { clearInterval(timer); timer = null; }
+  const [id, , fn] = current();
+  $('#tabs').replaceChildren(...TABS.map(t => h('a', { href: '#' + t[0], 'aria-current': t[0] === id ? 'page' : null }, t[1])));
+  const main = $('#view'); main.replaceChildren(fn());
+  const a = $('#tabs a[aria-current]'); if (a && a.scrollIntoView) a.scrollIntoView({ inline: 'center', block: 'nearest' });
+}
+let last = null;
+window.addEventListener('hashchange', () => { if (last !== location.hash) { last = location.hash; render(); window.scrollTo(0, 0); } });
+last = location.hash; render();
+})();
+
+</script>
+</body>
+</html>
