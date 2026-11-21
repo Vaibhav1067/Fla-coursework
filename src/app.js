@@ -601,14 +601,26 @@ function viewQuiz() {
   return root;
 }
 
+/*LESSONS*/
 /* ---------- router ---------- */
-const TABS = [['priority', 'Priorities', viewPriority], ['plan', 'Study plan', viewPlan], ['fa', 'Automata lab', viewFA], ['gram', 'Grammar lab', viewGram], ['pda', 'PDA lab', viewPDA], ['tm', 'Turing lab', viewTM], ['undec', 'Undecidability', viewUndec], ['quiz', 'Part A quiz', viewQuiz]];
-function current() { const id = (location.hash || '').slice(1); return TABS.find(t => t[0] === id) || TABS[0]; }
+const LABS = ['fa', 'gram', 'pda', 'tm', 'undec'];
+const TABS = [['start', 'Start', viewHome], ['priority', 'Exam map', viewPriority], ['plan', 'Revision', viewPlan], ['fa', 'Sandbox', viewFA], ['quiz', 'Part A quiz', viewQuiz]];
+const LAB_VIEWS = { fa: viewFA, gram: viewGram, pda: viewPDA, tm: viewTM, undec: viewUndec };
+const LAB_NAMES = { fa: 'Automata', gram: 'Grammar', pda: 'PDA', tm: 'Turing', undec: 'PCP' };
+function route() {
+  const id = (location.hash || '').slice(1);
+  if (id.startsWith('learn/')) return { tab: 'start', fn: () => viewLesson(id.slice(6)), lab: null };
+  if (LAB_VIEWS[id]) return { tab: 'fa', fn: LAB_VIEWS[id], lab: id };
+  const t = TABS.find(x => x[0] === id) || TABS[0];
+  return { tab: t[0], fn: t[2], lab: null };
+}
 function render() {
   if (timer) { clearInterval(timer); timer = null; }
-  const [id, , fn] = current();
-  $('#tabs').replaceChildren(...TABS.map(t => h('a', { href: '#' + t[0], 'aria-current': t[0] === id ? 'page' : null }, t[1])));
-  const main = $('#view'); main.replaceChildren(fn());
+  const r = route();
+  $('#tabs').replaceChildren(...TABS.map(t => h('a', { href: '#' + t[0], 'aria-current': t[0] === r.tab ? 'page' : null }, t[1])));
+  const main = $('#view'); main.replaceChildren();
+  if (r.lab) main.append(h('div', { class: 'subnav' }, h('span', { class: 'small muted' }, 'Sandbox:'), Object.entries(LAB_NAMES).map(([k, v]) => h('a', { href: '#' + k, 'aria-current': k === r.lab ? 'page' : null }, v))));
+  main.append(r.fn());
   const a = $('#tabs a[aria-current]'); if (a && a.scrollIntoView) a.scrollIntoView({ inline: 'center', block: 'nearest' });
 }
 let last = null;
