@@ -14,7 +14,7 @@ function practiceCard(lid, idx, title, prompt, body, fb, answer) {
   const done = !!(prog[lid] && prog[lid]['p' + idx]);
   const card = h('section', { class: 'card try' + (done ? ' isdone' : '') }, h('div', { class: 'row' }, h('span', { class: 'pill run' }, 'Your turn ' + (idx + 1)), h('h3', {}, title), done ? h('span', { class: 'pill ok' }, 'done') : null), prompt, body, fb.el,
     answer ? h('details', {}, h('summary', {}, 'Stuck? Show the answer'), h('div', { class: 'body' }, answer)) : null);
-  const orig = fb.ok; fb.ok = m => { orig(m); markDone(lid, 'p' + idx); card.classList.add('isdone'); };
+  const orig = fb.ok; fb.ok = m => { const first = !(prog[lid] && prog[lid]['p' + idx]); orig(m); markDone(lid, 'p' + idx); card.classList.add('isdone'); if (first) { xpAdd(20); confetti(); } else confetti(25); };
   return card;
 }
 function reveal(items) {
@@ -182,19 +182,26 @@ function minGuide(L, idx, title, q, dfaText) {
 }
 
 function tmPlayer(p, input) {
-  const tm = F.parseTM(p.text), res = F.runTM(tm, input), cfgs = res.configs; let i = 0;
-  const tape = h('div', { class: 'tape' }), info = h('div', { class: 'explain' }), st = h('span', { class: 'statebox' }), cnt = h('b', { class: 'mono' });
+  const tm = F.parseTM(p.text), res = F.runTM(tm, input), cfgs = res.configs; let i = 0, playing = false;
+  const tape = h('div', { class: 'tape' }), info = h('div', { class: 'explain' }), st = h('span', { class: 'statebox' }), cnt = h('b', { class: 'mono' }), sp = speedCtl(900);
+  const rules = Object.entries(tm.trans).map(([k, v]) => { const [a, b] = k.split('\u0001'); return { a, b, v, tr: h('tr', {}, [a, b, v[0], v[1], v[2]].map(x => h('td', { class: 'mono-cell' }, x))) }; });
+  const rtab = h('div', { class: 'scroll rtab' }, h('table', {}, h('thead', {}, h('tr', {}, ['State', 'Read', 'Next', 'Write', 'Move'].map(x => h('th', {}, x)))), h('tbody', {}, rules.map(r => r.tr))));
   const draw = () => {
     const c = cfgs[i], blank = tm.blank, pad = 3, left = Math.max(0, pad - c.head), right = Math.max(0, pad - (c.tape.length - 1 - c.head));
     const all = Array(left).fill(blank).concat(c.tape, Array(right).fill(blank)), hd = c.head + left;
-    tape.replaceChildren(...all.map((ch, k) => h('div', { class: 'cell' + (k === hd ? ' head' : '') + (ch === blank ? ' blank' : '') }, ch === blank ? '·' : ch)));
+    const pc = i ? cfgs[i - 1] : null, wrote = pc ? pc.head - c.head + hd : -1;
+    tape.replaceChildren(...all.map((ch, k) => h('div', { class: 'cell' + (k === hd ? ' head' : '') + (ch === blank ? ' blank' : '') + (k === wrote ? ' wrote' : '') }, ch === blank ? '·' : ch)));
     st.textContent = 'state ' + c.state; cnt.textContent = 'step ' + i + ' of ' + (cfgs.length - 1);
     info.textContent = i ? c.note : 'Start. The head is on the first symbol.';
-    if (i === cfgs.length - 1) info.textContent += '   →   ' + (res.status === 'accepted' ? 'ACCEPTED' : 'halted without accepting');
+    rules.forEach(r => r.tr.classList.remove('now'));
+    if (pc) { const sym = pc.tape[pc.head] === undefined ? blank : pc.tape[pc.head]; const r = rules.find(x => x.a === pc.state && x.b === sym); if (r) { r.tr.classList.add('now'); const box = rtab; const top = r.tr.offsetTop - box.clientHeight / 2; box.scrollTop = Math.max(0, top); } }
+    if (i === cfgs.length - 1) { info.textContent += '   →   ' + (res.status === 'accepted' ? 'ACCEPTED' : 'halted without accepting'); st.classList.toggle('acc', res.status === 'accepted'); } else st.classList.remove('acc');
   };
+  const play = async () => { if (i >= cfgs.length - 1) i = 0; playing = true; while (playing && i < cfgs.length - 1) { i++; draw(); await sleep(sp.get() / 2); } };
   draw();
   return h('div', { class: 'tmp' }, h('div', { class: 'row' }, h('b', {}, 'Input: ' + input), st, cnt), tape, info,
-    h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', onclick: () => { i = 0; draw(); } }, '⏮ Start'), h('button', { class: 'btn', type: 'button', onclick: () => { if (i > 0) { i--; draw(); } } }, '◀ Back'), h('button', { class: 'btn primary', type: 'button', onclick: () => { if (i < cfgs.length - 1) { i++; draw(); } } }, 'Next step ▶'), h('button', { class: 'btn', type: 'button', onclick: () => { i = Math.min(cfgs.length - 1, i + 10); draw(); } }, '+10')));
+    h('div', { class: 'row' }, h('button', { class: 'btn primary', type: 'button', onclick: play }, '▶ Play'), h('button', { class: 'btn', type: 'button', onclick: () => { playing = false; } }, '⏸'), h('button', { class: 'btn', type: 'button', onclick: () => { playing = false; i = 0; draw(); } }, '⏮'), h('button', { class: 'btn', type: 'button', onclick: () => { playing = false; if (i > 0) { i--; draw(); } } }, '◀'), h('button', { class: 'btn', type: 'button', onclick: () => { playing = false; if (i < cfgs.length - 1) { i++; draw(); } } }, 'Step ▶'), sp.el),
+    h('div', { class: 'small muted' }, 'The highlighted row is the rule the machine just used.'), rtab);
 }
 function tmPredict(L, idx, title, q, presetId, input, n) {
   const p = byId(P.tm, presetId), tm = F.parseTM(p.text), res = F.runTM(tm, input), c = res.configs[n];
@@ -210,7 +217,7 @@ function pdaPredict(L, idx, title, q, presetId, input, upto) {
   const p = byId(P.pda, presetId), pda = F.parsePDA(p.text), r = F.simulatePDA(pda, input), node = r.path.find(x => x.i === upto), want = node.st.join('');
   const fb = fbBox(), inp = h('input', { type: 'text', placeholder: 'stack, top first', 'aria-label': 'Stack' });
   const go = () => { if (inp.value.replace(/\s+/g, '') === want) fb.ok('Right. The stack, top first, is ' + want + '.'); else fb.bad('Follow the moves one at a time from the trace above. Each a that is read pushes one more a above Z0. Write the stack top first with Z0 at the bottom.'); };
-  return practiceCard(L.id, idx, title, h('div', {}, h('p', {}, q), pre(p.text.replace(/^#.*\n/gm, '').trim()), pdaTrace(pda, input)), h('div', { class: 'row' }, inp, h('button', { class: 'btn primary', type: 'button', onclick: go }, 'Check')), fb, h('p', {}, 'The stack is ' + want + '.'));
+  return practiceCard(L.id, idx, title, h('div', {}, h('p', {}, q), pre(p.text.replace(/^#.*\n/gm, '').trim()), pdaAnim(pda, input)), h('div', { class: 'row' }, inp, h('button', { class: 'btn primary', type: 'button', onclick: go }, 'Check')), fb, h('p', {}, 'The stack is ' + want + '.'));
 }
 function pcpPractice(L, idx, title, q, tiles, mpcp) {
   const fb = fbBox(), inp = h('input', { type: 'text', placeholder: 'tile numbers, e.g. 2 1 1 3', 'aria-label': 'Tile sequence' });
@@ -242,8 +249,10 @@ const LESSONS = [
       { t: 'Draw one arrow per symbol from each state.', node: P2('From q0: 0 starts a possible "01" so go to q1. 1 gives no progress so stay at q0. From q1: 0 keeps us at q1 (the new 0 is the start). 1 completes "01", go to q2. From q2: 0 goes to q1. 1 goes to q0 (progress lost).') },
       { t: 'The finished machine.', node: h('div', {}, dfaTable(d), dfaGraph(d)) },
       { t: 'Test it.', node: P2('"01": q0 → q1 → q2, final, accepted. "101": q0 → q0 → q1 → q2, accepted. "010": ends in q1, rejected. "ε": stays in q0, rejected. All correct.') }]); },
+    toy: () => runner(dfaAdapter(F.faToDfaObj(F.parseFA(DFA_EX))), '0101', ['01', '1101', '010', '', '0011'], 'This machine accepts strings that end in 01. Press Play and watch the dot follow the arrows.'),
     pitfalls: ['Forgetting an arrow. Every state needs one arrow for every symbol.', 'Making too many states. Ask what you really must remember.', 'Forgetting that the empty string is accepted only when the start state is final.'],
     practice: [
+      L => quickfire(L, 3, 'Quick-fire: accept or reject?', F.faToDfaObj(F.parseFA(DFA_EX)), ['0', '1'], 'Run the machine in your head. Will it accept the string? Get 8 in a row.'),
       L => dfaBuilder(L, 0, 'Even number of 0s', 'Design a DFA over {0,1} that accepts strings with an even number of 0s. Click the arrows with the dropdowns and tick the final states.', ['0', '1'], w => count(w, '0') % 2 === 0, 'Two states. q0 (even, start, final) and q1 (odd). On 0 swap between q0 and q1. On 1 stay where you are.', 2),
       L => dfaBuilder(L, 1, 'No two 0s in a row', 'Design a DFA over {0,1} that accepts strings that do NOT contain 00. Hint: you need a dead state.', ['0', '1'], w => !w.includes('00'), 'q0: start or last symbol 1 (final). q1: last symbol 0 (final). q2: dead (not final). q0: 0→q1, 1→q0. q1: 0→q2, 1→q0. q2: 0→q2, 1→q2.', 3),
       L => dfaBuilder(L, 2, 'Number of a\'s divisible by 3', 'Design a DFA over {a,b} that accepts strings where the number of a\'s is a multiple of 3 (0 counts).', ['a', 'b'], w => count(w, 'a') % 3 === 0, 'Three states counting a\'s mod 3. q0 (start, final), q1, q2. On a: q0→q1→q2→q0. On b: stay in the same state.', 3)] },
@@ -251,7 +260,9 @@ const LESSONS = [
   { id: 'nfa', unit: 1, title: 'NFA to DFA (subset construction)', time: '60 min',
     plain: 'An NFA may have choices: one symbol can lead to several states, or to none. A DFA cannot, so we build a DFA whose every state is a set of NFA states. That set means "the NFA could be in any of these right now". This is the most predictable question in Unit 1.',
     method: ['The start state of the DFA is the set {q0}. For an ε-NFA, use the ε-closure of q0 (everything reachable by ε-moves, including q0 itself).', 'Take a set and a symbol. For each NFA state in the set, find where it goes on that symbol. Union all those targets. For an ε-NFA, add the ε-closure of the result. That union is the next set.', 'Any new set is a new DFA state. Repeat step 2 for it, for every symbol, until no new sets appear.', 'The empty set ∅ is allowed. It is a dead state that loops on everything.', 'A DFA state is final if its set contains at least one NFA final state.', 'Draw the table in the exam. Name sets A, B, C if you like, but show what each means.'],
-    example: () => { const p = byId(P.nfa, 'n24'), fa = F.parseFA(p.text), r = F.nfaToDfa(fa); return reveal([
+    toy: () => runner(faAdapter(F.parseFA(byId(P.nfa, 'n24').text)), '0110', ['10', '0111', '1100', '11'], 'This NFA guesses. Watch several states light up at once. The set of lit states after each symbol is exactly one DFA state. That is the whole trick.'),
+    example: () => subsetAnim(F.parseFA(byId(P.nfa, 'n24').text)),
+    exampleOld: () => { const p = byId(P.nfa, 'n24'), fa = F.parseFA(p.text), r = F.nfaToDfa(fa); return reveal([
       { t: 'The NFA: second symbol from the end is 1.', node: h('div', {}, pre(p.text.replace(/^#.*\n/gm, '').trim()), faGraph(fa)) },
       { t: 'Start with {' + r.startSet.join(',') + '}.', node: P2('This is the first row of the table.') },
       ...r.rows.map(x => ({ t: fmtSet(x.from) + ' on ' + x.sym + ' = ' + fmtSet(x.to), node: P2('Union of where each member goes on ' + x.sym + '.' + (!r.rows.some(y => setKey(y.from) === setKey(x.to)) ? ' ' : (setKey(x.to) !== setKey(x.from) ? ' This set is also a DFA state.' : ''))) })),
@@ -265,7 +276,8 @@ const LESSONS = [
   { id: 'min', unit: 1, title: 'Minimize a DFA (table filling)', time: '45 min',
     plain: 'Two states are equivalent if no string can tell them apart: from either one, the same strings lead to acceptance. Minimizing means merging every group of equivalent states. The result is the smallest DFA for the same language.',
     method: ['Delete states you can never reach from the start.', 'Draw a triangle table with one cell for every pair of states.', 'Round 0: mark a pair if exactly one of its states is final. Those two are different already.', 'Next rounds: look at each unmarked pair (p,q). For each symbol, see where p and q go. If that pair of targets is already marked, mark (p,q). Repeat until nothing new is marked.', 'The unmarked pairs are equivalent. Group them.', 'Each group becomes one state of the minimal DFA. Transitions go to the group of the old target. The start group contains the old start. A group is final if its members are final.'],
-    example: () => { const p = byId(P.dfa, 'm25'), d = F.faToDfaObj(F.parseFA(p.text)), m = F.minimizeDFA(d), R = m.states;
+    example: () => h('div', {}, h('p', { class: 'small muted' }, 'May 2025 Q26. Press Next round and watch pairs get crossed out.'), minAnim(F.faToDfaObj(F.parseFA(byId(P.dfa, 'm25').text)))),
+    exampleOld: () => { const p = byId(P.dfa, 'm25'), d = F.faToDfaObj(F.parseFA(p.text)), m = F.minimizeDFA(d), R = m.states;
       const pt = () => { const rows = []; for (let i = 1; i < R.length; i++) rows.push([R[i], ...R.slice(0, i).map(q => { const mk = m.marks.get(m.pk(R[i], q)); return mk ? String(mk.round) : '≡'; })]); return table(['', ...R.slice(0, R.length - 1)], rows, { cls: 'pairs' }); };
       return reveal([
         { t: 'The DFA (May 2025 Q26).', node: h('div', {}, dfaTable(d), P2(m.removed.length ? 'Unreachable: ' + m.removed.join(', ') + ' (removed).' : 'Every state is reachable.')) },
@@ -285,6 +297,7 @@ const LESSONS = [
       { t: 'Run it on ' + p.test + '.', node: table(['Step', 'From', 'Input', 'To', 'Output'], r.steps.map((s, i) => [i + 1, s.from, s.sym, s.to, s.out]), { monoCols: [1, 2, 3, 4] }) },
       { t: 'The output string.', node: P2(r.out + '. It has the same length as the input.') },
       { t: 'Convert to Moore.', node: (() => { const c = F.mealyToMoore(m, '0'); return h('div', {}, P2('Each state is split by the outputs arriving at it. Result: ' + c.moore.states.join(', ') + '.'), table(['State', 'Output', ...c.moore.alphabet.map(a => 'on ' + a)], c.moore.states.map(s => [s, c.moore.out[s], ...c.moore.alphabet.map(a => c.moore.delta[s][a] || '–')]), { monoCols: [0, 1, 2, 3] })); })() }]); },
+    toy: () => runner(mealyAdapter(F.parseMealy(byId(P.mealy, 'j1').text)), byId(P.mealy, 'j1').test, ['0010', '1111', '0101'], 'Each arrow is labelled input/output. Watch the output tape fill as the dot moves.'),
     pitfalls: ['Giving a Mealy output with one extra symbol, or a Moore output without the start output.', 'Forgetting to split a state that has two different incoming outputs.'],
     practice: [L => ask(L, 0, 'Run a Mealy machine', 'This Mealy machine flips every bit.\n' + MEALY_PRACTICE.replace(/\n/g, '   ') + '\nWhat is the output for 0110?', t => ({ ok: t === F.runMealy(F.parseMealy(MEALY_PRACTICE), '0110').out, msg: 'Each 0 prints 1 and each 1 prints 0, giving ' + F.runMealy(F.parseMealy(MEALY_PRACTICE), '0110').out + '.' }), 'Print the opposite of each symbol.', null, 'output'),
       L => mcq(L, 1, 'Output length', 'A Moore machine reads an input of length 5. How long is its output string?', ['4', '5', '6', 'It depends on the state'], 2, 'The start state prints once before any input, then 5 more states print, so 6 symbols.')] },
@@ -296,6 +309,7 @@ const LESSONS = [
       { t: 'The grammar.', node: gtext(g) },
       ...r.log.map(l => ({ t: l.title, node: h('div', {}, P2(l.note), gtext(l.g)) })),
       { t: 'The answer.', node: P2('The last grammar is the answer. Each step is shown in the exam, so show all three.') }]); },
+    toy: () => derivAnim(F.parseGrammar('S -> aSb | ab'), 'aaabbb', ['ab', 'aabb', 'aaaabbbb']),
     pitfalls: ['Doing unit removal before ε removal (ε removal can create new unit rules).', 'Forgetting a rule when a rule has two nullable variables: write all four versions.', 'Removing unreachable variables before non-generating ones.'],
     practice: [L => gramSteps(L, 0, 'Simplify step by step', 'Simplify this grammar. Do each step and check it before moving on.', 'S -> ASB | ε\nA -> aAS | a\nB -> SbS | A | bb'),
       L => gramSteps(L, 1, 'One with useless symbols', 'Simplify this grammar (Step 1 has nothing nullable, so just copy it).', 'S -> aA | B\nA -> aA | a\nB -> bB\nC -> c')] },
@@ -311,6 +325,7 @@ const LESSONS = [
         { t: 'GNF example (a paper question): S → AA | a, A → SS | b.', node: gtext(g) },
         ...gn.log.map(l => ({ t: l.title, node: h('div', {}, l.note ? P2(l.note) : null, gtext(l.g)) })),
         { t: 'The GNF answer.', node: gtext(gn.g) }]); },
+    toy: () => h('div', {}, h('p', { class: 'small muted' }, 'This is the CNF of S → aSb | ab. Play it: every node has exactly two variable children or one terminal child. That is what CNF means.'), derivAnim(F.toCNF(F.simplify(F.parseGrammar('S -> aSb | ab'), true).g), 'aabb', ['ab', 'aaabbb'])),
     pitfalls: ['Splitting a terminal inside a rule like A → aB: in CNF this becomes A → CₐB.', 'Skipping the substitution order in GNF. Always go from the highest-numbered variable down.', 'Using multi-letter variable names. In the checkers below use single capital letters like X, Y, P, Q, R.'],
     practice: [L => normalForm(L, 0, 'Convert to CNF', 'Convert to Chomsky normal form. Use single capital letters for new variables.', 'S -> aAB | b\nA -> aA | a\nB -> bB | b', 'cnf', 'Nothing here is nullable or a unit rule, so go straight to replacing terminals and splitting. New variables: use X, Y, P, Q.', 'S -> XD | b\nA -> XA | a\nB -> YB | b\nX -> a\nY -> b\nD -> AB'),
       L => normalForm(L, 1, 'Convert to GNF', 'Convert this grammar to Greibach normal form.', 'S -> AB\nA -> aA | a\nB -> bB | b', 'gnf', 'S → AB: replace A by its two rules. Then A and B are already in GNF.'),
@@ -319,11 +334,13 @@ const LESSONS = [
   { id: 'pda', unit: 3, title: 'Pushdown automata', time: '60 min',
     plain: 'A PDA is a finite automaton with a stack, like a pile of plates. You can push a symbol on top, look at the top, or pop it. The stack gives the machine memory, so it can count: it can match aⁿbⁿ, which a DFA cannot.',
     method: ['Think of the idea in plain words first: "push for every a, pop for every b".', 'One move reads: state, input symbol (or ε), top of stack → new state, string to push in place of the top.', 'Pushing aZ0 puts a on top of Z0. Popping means replacing the top by ε.', 'Z0 is the bottom marker. When the input is finished and Z0 is back on top, move to the final state.', 'Always trace one accepted string and one rejected string.', 'For a CFG: use one state. For each rule A → α, add (ε, A) → α. For each terminal a, add (a, a) → ε. Start by pushing S.'],
-    example: () => { const p = byId(P.pda, 'anbn'), pda = F.parsePDA(p.text); return reveal([
+    example: () => h('div', {}, pre(byId(P.pda, 'anbn').text.trim()), pdaAnim(F.parsePDA(byId(P.pda, 'anbn').text), 'aaabbb', ['ab', 'aabb', 'aab', 'abb'])),
+    exampleOld: () => { const p = byId(P.pda, 'anbn'), pda = F.parsePDA(p.text); return reveal([
       { t: 'Idea for aⁿbⁿ.', node: P2('Push an a for every a. Then pop an a for every b. If we reach the bottom marker exactly when the input ends, accept.') },
       { t: 'The moves.', node: pre(p.text.trim()) },
       { t: 'Trace of aabb.', node: pdaTrace(pda, 'aabb') },
       { t: 'Trace of aab (it is rejected).', node: pdaTrace(pda, 'aab') }]); },
+    toy: () => h('div', {}, h('p', { class: 'small muted' }, 'Equal number of a and b (Jul 2025, Nov 2025). Watch the stack: it holds the surplus letters.'), pdaAnim(F.parsePDA(byId(P.pda, 'eq').text), 'abba', ['aabb', 'baab', 'abab', 'aab'])),
     pitfalls: ['Writing the stack in the wrong order. Write top first.', 'Forgetting that pop means replace by ε.', 'No move for some situation, so the machine gets stuck and rejects.'],
     practice: [L => pdaPredict(L, 0, 'Stack contents', 'Look at the trace. Type the stack (top first) after the first two a\'s have been read.', 'anbn', 'aabb', 2),
       L => mcq(L, 1, 'When do we accept', 'In the aⁿbⁿ PDA, when does the machine accept?', ['When the stack is empty and the input is not finished', 'When the input is finished and the stack is back to Z0', 'When it has read at least one a', 'When it has pushed more than it popped'], 1, 'The count matches exactly when the stack is back at the bottom marker as the input ends.'),
@@ -349,7 +366,8 @@ const LESSONS = [
         { t: 'Build the answer one tile at a time.', node: table(['Step', 'Tile', 'Top adds', 'Bottom adds', 'Top so far', 'Bottom so far'], rows, { monoCols: [2, 3, 4, 5] }) },
         { t: 'Result.', node: P2('Sequence ' + sol.seq.join(', ') + ' spells ' + sol.top + ' on both rows.') }]); },
     pitfalls: ['Getting a wrong tile number from the question. Number them in the order given.', 'Stopping when the rows are not equal: they must be exactly equal and non-empty.'],
-    practice: [L => pcpPractice(L, 0, 'Solve a PCP', 'Find a sequence of tiles so top = bottom.', byId(P.pcp, 'j2').tiles, false),
+    practice: [L => pcpGame(L, 0, 'Domino game: solve the PCP', 'Click dominoes to lay them left to right. Green letters match, red ones clash. Make top and bottom spell the same string.', byId(P.pcp, 'j2').tiles, false),
+      L => pcpGame(L, 3, 'Harder: Jul 2025 P1 Q26', 'This instance came up in a paper. Use the hint if you get stuck.', byId(P.pcp, 'j1').tiles, false),
       L => mcq(L, 1, 'Rice\'s theorem', 'Rice\'s theorem says…', ['Every property of a Turing machine is decidable', 'Every non-trivial property of the language of a Turing machine is undecidable', 'The halting problem is decidable', 'All languages are context free'], 1, 'Non-trivial means some machines have it and some do not. All such properties of L(M) are undecidable.'),
       L => mcq(L, 2, 'Halting', 'The halting problem is…', ['Decidable', 'Undecidable but recursively enumerable', 'Not recursively enumerable', 'Context free'], 1, 'We can run M on w and say yes if it halts, so it is recursively enumerable, but no machine can always say no.')] },
 
@@ -363,7 +381,7 @@ function viewHome() {
   const total = LESSONS.reduce((a, l) => a + l.practice.length, 0), done = LESSONS.reduce((a, l) => a + doneCount(l), 0);
   root.append(h('section', { class: 'hero' }, h('div', { class: 'eyebrow' }, 'FLA · 21CSC301T'), h('h1', {}, 'Learn it. Then prove it.'),
     h('p', { class: 'lede' }, 'Do the lessons in order. Each one explains the idea in plain words, gives you the method, walks through one example step by step, and then asks you to solve problems. The page checks your answer.'),
-    h('div', { class: 'progress', role: 'progressbar', 'aria-label': 'Problems solved' }, h('i', { style: 'width:' + Math.round(100 * done / total) + '%' })), h('div', { class: 'small' }, h('b', {}, done + ' of ' + total + ' problems solved'))));
+    h('div', { class: 'progress', role: 'progressbar', 'aria-label': 'Problems solved' }, h('i', { style: 'width:' + Math.round(100 * done / total) + '%' })), h('div', { class: 'small' }, h('b', {}, done + ' of ' + total + ' problems solved'), '  ·  ⚡ ' + xpGet() + ' XP · level ' + (Math.floor(xpGet() / 50) + 1) + '  ·  every solved problem is +20 XP')));
   root.append(h('div', { class: 'lessons' }, LESSONS.map((L, i) => h('a', { class: 'lcard' + (L.practice.length && doneCount(L) === L.practice.length ? ' fin' : ''), href: '#' + (L.link || 'learn/' + L.id) },
     h('span', { class: 'ln' }, String(i + 1)), h('div', { class: 'lb' }, h('b', {}, L.title), h('span', { class: 'small muted' }, (L.unit ? 'Unit ' + L.unit + ' · ' : 'All units · ') + L.time + (L.practice.length ? ' · ' + lessonProgress(L) : ''))), h('span', { class: 'go', 'aria-hidden': 'true' }, '→')))));
   root.append(h('section', { class: 'note' }, h('b', {}, 'Stuck? '), 'Every problem has a "Show the answer" fold. Look only after you have tried on paper. If a lesson does not make sense, tell me which step and I will explain it differently.'));
@@ -376,6 +394,7 @@ function viewLesson(id) {
   root.append(h('a', { href: '#start', class: 'small' }, '← All lessons'));
   root.append(h('section', { class: 'hero' }, h('div', { class: 'eyebrow' }, 'Lesson ' + (i + 1) + ' of ' + LESSONS.length + ' · Unit ' + L.unit + ' · ' + L.time), h('h1', {}, L.title)));
   root.append(h('section', { class: 'card' }, h('h2', {}, '1. The idea'), h('p', { class: 'big' }, L.plain)));
+  if (L.toy) root.append(h('section', { class: 'card toy' }, h('h2', {}, '🎮 Play with it first'), L.toy()));
   root.append(h('section', { class: 'card' }, h('h2', {}, '2. The method'), h('ol', { class: 'method' }, L.method.map(m => h('li', {}, m)))));
   root.append(h('section', { class: 'card' }, h('h2', {}, '3. Watch one example'), L.example()));
   if (L.pitfalls.length) root.append(h('section', { class: 'note' }, h('b', {}, 'Where marks are lost. '), h('ul', {}, L.pitfalls.map(x => h('li', {}, x)))));

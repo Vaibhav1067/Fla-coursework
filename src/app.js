@@ -63,12 +63,12 @@ function svgGraph(m) {
   let out = '';
   for (const g of groups.values()) {
     const A = pos[g.from], B = pos[g.to]; if (!A || !B) continue;
-    const label = esc(g.labels.join(', '));
+    const label = esc(g.labels.join(', ')), ek = esc(g.from + '→' + g.to);
     if (g.from === g.to) {
       const ang = Math.atan2(A.uy, A.ux) + (A.nd.start ? 0.95 : 0);
       const p = (a, d) => [A.x + d * Math.cos(a), A.y + d * Math.sin(a)];
       const p1 = p(ang - 0.5, r), p2 = p(ang + 0.5, r + 3), c1 = p(ang - 0.42, r + 46), c2 = p(ang + 0.42, r + 46), lp = p(ang, r + 40);
-      out += `<path class="g-edge" d="M${p1[0]},${p1[1]} C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${p2[0]},${p2[1]}" marker-end="url(#${id})"/><text class="g-el" x="${lp[0]}" y="${lp[1]}">${label}</text>`;
+      out += `<path class="g-edge" data-e="${ek}" d="M${p1[0]},${p1[1]} C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${p2[0]},${p2[1]}" marker-end="url(#${id})"/><text class="g-el" data-e="${ek}" x="${lp[0]}" y="${lp[1]}">${label}</text>`;
     } else {
       const rev = groups.has(g.to + '\u0001' + g.from);
       const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
@@ -82,18 +82,18 @@ function svgGraph(m) {
       const s = [A.x + u1[0] * r, A.y + u1[1] * r], e = [B.x + u2[0] * (r + 3), B.y + u2[1] * (r + 3)];
       const q = [0.25 * s[0] + 0.5 * C[0] + 0.25 * e[0], 0.25 * s[1] + 0.5 * C[1] + 0.25 * e[1]];
       const off = rev ? 9 * side : 11;
-      out += `<path class="g-edge" d="M${s[0]},${s[1]} Q${C[0]},${C[1]} ${e[0]},${e[1]}" marker-end="url(#${id})"/><text class="g-el" x="${q[0] + px * off}" y="${q[1] + py * off}">${label}</text>`;
+      out += `<path class="g-edge" data-e="${ek}" d="M${s[0]},${s[1]} Q${C[0]},${C[1]} ${e[0]},${e[1]}" marker-end="url(#${id})"/><text class="g-el" data-e="${ek}" x="${q[0] + px * off}" y="${q[1] + py * off}">${label}</text>`;
     }
   }
   for (const nd of m.nodes) {
     const P0 = pos[nd.id];
     if (nd.start) {
       const a = [P0.x + P0.ux * (r + 34), P0.y + P0.uy * (r + 34)], b = [P0.x + P0.ux * (r + 3), P0.y + P0.uy * (r + 3)];
-      out += `<path class="g-edge" d="M${a[0]},${a[1]} L${b[0]},${b[1]}" marker-end="url(#${id})"/>`;
+      out += `<path class="g-edge g-start" data-n="${esc(nd.id)}" d="M${a[0]},${a[1]} L${b[0]},${b[1]}" marker-end="url(#${id})"/>`;
     }
-    out += `<circle class="g-node${nd.active ? ' active' : ''}" cx="${P0.x}" cy="${P0.y}" r="${r}"/>`;
-    if (nd.final) out += `<circle class="g-inner" cx="${P0.x}" cy="${P0.y}" r="${r - 5}"/>`;
-    out += `<text class="g-label${nd.active ? ' active' : ''}" x="${P0.x}" y="${P0.y}" style="font-size:${maxLen > 6 ? 10 : 12}px">${esc(nd.label)}</text>`;
+    out += `<circle class="g-node${nd.active ? ' active' : ''}" data-n="${esc(nd.id)}" cx="${P0.x}" cy="${P0.y}" r="${r}"/>`;
+    if (nd.final) out += `<circle class="g-inner" data-n="${esc(nd.id)}" cx="${P0.x}" cy="${P0.y}" r="${r - 5}"/>`;
+    out += `<text class="g-label${nd.active ? ' active' : ''}" data-n="${esc(nd.id)}" x="${P0.x}" y="${P0.y}" style="font-size:${maxLen > 6 ? 10 : 12}px">${esc(nd.label)}</text>`;
   }
   const svg = h('div', {});
   svg.innerHTML = `<svg class="graph" viewBox="0 0 ${W} ${H}" role="img" aria-label="State diagram"><defs><marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="g-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs>${out}</svg>`;
@@ -625,5 +625,5 @@ function render() {
 }
 let last = null;
 window.addEventListener('hashchange', () => { if (last !== location.hash) { last = location.hash; render(); window.scrollTo(0, 0); } });
-last = location.hash; render();
+last = location.hash; render(); xpBadge();
 })();
