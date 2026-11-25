@@ -31,3 +31,10 @@ section{margin:18px 0}.hero{background:var(--card);border:1px solid var(--line);
 #tip{position:absolute;display:none;z-index:50;background:#111827;color:#fff;border-radius:8px;padding:6px 10px;font-size:.82rem;max-width:260px;pointer-events:none}
 footer{color:var(--mut);font-size:.85rem;margin-top:30px;border-top:1px solid var(--line);padding-top:12px}
 [hidden]{display:none!important}
+
+.qx{margin-bottom:6px;line-height:1.45}.slots th[scope=row]{white-space:nowrap;font-weight:600;vertical-align:top}.slots td{min-width:230px;vertical-align:top}
+.note{background:rgba(59,91,219,.1);border-radius:8px;padding:9px 12px;margin:8px 0}
+.asked{grid-template-columns:1fr!important}.asked li{display:flex;gap:12px;align-items:flex-start;justify-content:flex-start!important}.asked .ap{min-width:68px;font-weight:600;color:var(--mut)}.asked li.n{opacity:.5}
+.tg{display:inline-block;font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:6px;padding:0 6px;margin-right:4px;color:var(--mut)}
+.ex{background:rgba(43,138,62,.1);border-left:3px solid var(--ok);padding:8px 12px;border-radius:6px;margin:0}
+#tip{max-width:360px}

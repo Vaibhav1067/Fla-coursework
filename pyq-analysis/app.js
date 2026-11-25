@@ -41,6 +41,9 @@ const PCHEAD=[['26','Q26'],['27','Q27']];
 function partCFor(pi){return T.filter(t=>hasCode(t.hits[pi],'26¹⁵')||hasCode(t.hits[pi],'27¹⁵'))}
 // MCQ build
 const MCQ=[];PORDER.forEach(p=>MCQ_RAW[p].forEach((r,i)=>MCQ.push({p,q:i+1,u:Math.ceil((i+1)/4),text:r[0],o:r[1],a:r[2],why:r[3],flag:r[4]||'',id:p+'-'+(i+1)})));
+
+const QTXT=(pi,code)=>{const p=PORDER[pi]; if(!code)return ''; const m=code.match(/^(\d\d)([ab])?(¹⁵)?$/); if(!m)return ''; if(m[3]){const pc=PARTC.find(x=>x.p===p);return pc?pc.q[m[1]==='26'?0:1]:''} const u=+m[1][1]; return SLOTS[u][p][m[2]==='a'?0:1]};
+const ptr=id=>P.findIndex(x=>x.id===id);
 // ------- router
 const TABS=[['overview','Overview'],['u1','Unit 1'],['u2','Unit 2'],['u3','Unit 3'],['u4','Unit 4'],['u5','Unit 5'],['partc','Part C'],['parta','Part A'],['mcq','MCQ bank'],['plan','Study plan']];
 function nav(){return '<nav class="tabs" id="tabs">'+TABS.map(([k,l])=>`<a href="#${k}" data-k="${k}">${l}</a>`).join('')+'</nav>'}
@@ -61,7 +64,7 @@ function covBar(label,v,tot,cls){const pc=Math.round(v/tot*100);return `<div cla
 function vOverview(){
  const n1=T.filter(t=>t.count>=5).length,n2=T.filter(t=>t.count>=3&&t.count<5).length;
  const cm=coverage(SETS.must),ch=coverage(SETS.high),cmd=coverage(SETS.med);
- const reps=D.repeats.map(r=>({...r,n:r.where.split(/ and |, /).length}));
+ const reps=REPEATS;
  let h=`<section class="hero"><h2>The short version</h2><ul class="big">
  <li><b>Same shape every time.</b> Part A is 20 MCQs, exactly 4 per unit. Part B is one 8-mark question per unit, each with an OR. Part C is one 15-mark question out of two.</li>
  <li><b>${n1} topics came up in 5 or 6 of the 6 papers.</b> Learn those first. They alone can answer ${cm.ok} of the ${cm.tot} Part B slots.</li>
@@ -75,9 +78,9 @@ function vOverview(){
  <p class="muted">Part C: must-do topics alone cover ${cm.c} of 6 papers.</p></section>`;
  h+=`<section><h3>Topic × paper map</h3><p class="muted">Each cell is one paper. Tap or hover for the exact question number. Darker means more questions on that topic in that paper.</p><div class="hmwrap"><table class="hm"><thead><tr><th></th>${PORDER.map(p=>`<th>${PSHORT[p]}</th>`).join('')}<th>Total</th></tr></thead><tbody>`;
  for(let u=1;u<=5;u++){h+=`<tr class="uh"><td colspan="8">${UNAME[u]} · ${USHORT[u]}</td></tr>`;
-  T.filter(t=>t.unit===u).sort((a,b)=>b.count-a.count).forEach(t=>{h+=`<tr><td class="tn"><a href="#u${u}">${esc(t.name)}</a></td>`+PORDER.map(p=>{const pi=P.findIndex(x=>x.id===p);const hh=t.hits[pi];const n=hh?hh.split('·').length:0;return `<td><span class="hc l${n}" ${hh?`data-tip="<b>${PLONG[p]}</b><br>${esc(t.name)}<br>${codeLabel(hh)}"`:''}>${n||''}</span></td>`}).join('')+`<td class="tot">${t.count}/6</td></tr>`})}
+  T.filter(t=>t.unit===u).sort((a,b)=>b.count-a.count).forEach(t=>{h+=`<tr><td class="tn"><a href="#u${u}">${esc(t.name)}</a></td>`+PORDER.map(p=>{const pi=P.findIndex(x=>x.id===p);const hh=t.hits[pi];const n=hh?hh.split('·').length:0;return `<td><span class="hc l${n}" ${hh?`data-tip="<b>${PLONG[p]}</b><br>${hh.split('·').map(c=>'<b>'+codeLabel(c)+'</b> '+esc(QTXT(pi,c))).join('<br>')}"`:''}>${n||''}</span></td>`}).join('')+`<td class="tot">${t.count}/6</td></tr>`})}
  h+='</tbody></table></div></section>';
- h+=`<section><h3>Questions that came back</h3><p class="muted">Almost word for word. If you can do these, you have already banked marks.</p><div class="grid2">`+reps.map(r=>`<div class="card rep"><span class="x">×${r.n}</span><b>${esc(r.what)}</b><small>${esc(r.where)}</small></div>`).join('')+'</div></section>';
+ h+=`<section><h3>Questions that came back</h3><p class="muted">Almost word for word. If you can do these, you have already banked marks.</p><div class="grid2">`+reps.map(r=>`<div class="card rep"><span class="x">×${r.n}</span><b>${esc(r.w)}</b><small>${esc(r.p)}</small></div>`).join('')+'</div></section>';
  h+=`<section><h3>How to write an 8-marker</h3><ol class="steps"><li>Write the definition or the idea in one line.</li><li>Draw the table, grammar or machine neatly. Label every state or symbol.</li><li>Do the steps in the standard order. Number them.</li><li>Test the string they gave you, and show the trace.</li><li>Write the answer in one line at the end.</li></ol><p class="muted">Show the steps even when you can see the answer. Marks go to the working.</p></section>`;
  $('#view').innerHTML=h}
 // ------- UNIT
@@ -85,23 +88,25 @@ function topicCard(t){
  const tpl=Object.entries(TPL).filter(([k,v])=>v.includes(t.id)).map(([k])=>D.templates[k]);
  const steps=tpl.length?tpl[0].steps:null;
  const traps=TRAPS[t.id]||[];
- const asked=PORDER.map(p=>{const pi=P.findIndex(x=>x.id===p);const h=t.hits[pi];return `<li class="${h?'y':'n'}"><span>${PSHORT[p]}</span><b>${h?codeLabel(h):'not asked'}</b></li>`}).join('');
- return `<details class="topic ${t.tr.k}"><summary>${chip(t)}<span class="tt">${esc(t.name)}</span>${dots(t)}<span class="cnt">${t.count}/6</span></summary><div class="tb"><p class="tipline">${esc(t.tip)}</p><h5>How it was asked</h5><ul class="asked">${asked}</ul>${steps?`<h5>Answer blueprint</h5><ol class="steps">${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`:''}${traps.length?`<h5>Watch out</h5><ul class="trap">${traps.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>`:''}<a class="try" href="${'Fla-course.html'}" onclick="return false" style="display:none"></a></div></details>`}
+ const asked=PORDER.map(p=>{const pi=P.findIndex(x=>x.id===p);const h=t.hits[pi];return `<li class="${h?'y':'n'}"><span class="ap">${PSHORT[p]}</span><div>${h?h.split('·').map(c=>`<span class="tg">${codeLabel(c)}</span> ${esc(QTXT(pi,c))}`).join('<br>'):'<span class="muted">not asked</span>'}</div></li>`}).join('');
+ return `<details class="topic ${t.tr.k}"><summary>${chip(t)}<span class="tt">${esc(t.name)}</span>${dots(t)}<span class="cnt">${t.count}/6</span></summary><div class="tb"><p class="tipline">${esc(t.tip)}</p><h5>How it was asked</h5><ul class="asked">${asked}</ul>${EX[t.id]?`<h5>Worked check</h5><p class="ex">${esc(EX[t.id])}</p>`:''}${steps?`<h5>Answer blueprint</h5><ol class="steps">${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`:''}${traps.length?`<h5>Watch out</h5><ul class="trap">${traps.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>`:''}<a class="try" href="${'Fla-course.html'}" onclick="return false" style="display:none"></a></div></details>`}
+
+function bet(u){const ts=T.filter(t=>t.unit===u&&t.count>=3).sort((a,b)=>b.count-a.count);const due=ts.filter(t=>!t.hits[5]).map(t=>t.name);const top=ts.slice(0,2).map(t=>t.name);return `<p class="note"><b>If you had to bet:</b> ${esc(top.join(' and '))} are the safest. ${due.length?'Not in the latest paper (May 2026) but regular before, so they may be due: '+esc(due.slice(0,3).join('; '))+'.':''}</p>`}
 function vUnit(u){
  const ts=T.filter(t=>t.unit===u).sort((a,b)=>b.count-a.count||a.effort-b.effort);
  const sl=D.slots.find(s=>s.unit===u);
  const cv=coverage(SETS.must).per[u],ca=coverage(SETS.med).per[u];
  let h=`<section class="hero"><h2>${UN[u]}</h2><p class="lead">${sl.title}. ${esc(sl.why)}</p><p class="muted">Must-do topics here cover ${cv} of 6 papers. With the medium topics, ${ca} of 6.</p>
- <p class="muted">Part A: 4 MCQs on this unit in every paper. <a href="#mcq" onclick="setTimeout(()=>mcqUnit(${u}),30)">See them in the MCQ bank</a>.</p></section>`;
+ ${bet(u)}<p class="muted">Part A: 4 MCQs on this unit in every paper. <a href="#mcq" onclick="setTimeout(()=>mcqUnit(${u}),30)">See them in the MCQ bank</a>.</p></section>`;
  h+='<div class="legend"><span class="chip must">Must-do 5–6 papers</span><span class="chip high">High 4</span><span class="chip med">Medium 3</span><span class="chip bonus">Bonus 1–2</span></div>';
  h+=ts.map(topicCard).join('');
- h+=`<section><h3>Every question slot, paper by paper</h3><div class="hmwrap"><table class="slots"><thead><tr><th>Paper</th><th>Option (a)</th><th>Option (b)</th></tr></thead><tbody>`+PORDER.map(p=>{const pi=P.findIndex(x=>x.id===p);const s=slotTopics(u,pi);const f=ids=>ids.length?ids.map(id=>`<span class="pill ${T[id].tr.k}">${esc(T[id].name)}</span>`).join(' '):'<span class="muted">other</span>';return `<tr><td><b>${PSHORT[p]}</b></td><td>${f(s.a)}</td><td>${f(s.b)}</td></tr>`}).join('')+'</tbody></table></div><p class="muted">"other" means a question outside the listed topics (a note, or a one-off). Each paper has one of (a) or (b) to answer.</p></section>';
+ h+=`<section><h3>Every question slot, paper by paper</h3><div class="hmwrap"><table class="slots"><thead><tr><th>Paper</th><th>Option (a)</th><th>Option (b)</th></tr></thead><tbody>`+PORDER.map(p=>{const pi=P.findIndex(x=>x.id===p);const s=slotTopics(u,pi);const f=(ids,i)=>`<div class="qx">${esc(SLOTS[u][p][i])}</div>`+(ids.length?ids.map(id=>`<span class="pill ${T[id].tr.k}">${esc(T[id].name)}</span>`).join(' '):'');return `<tr><th scope="row">${PLONG[p]}</th><td>${f(s.a,0)}</td><td>${f(s.b,1)}</td></tr>`}).join('')+'</tbody></table></div><p class="muted">Each paper asks you to answer one of (a) or (b). The coloured tags show which topic card covers each option.</p></section>';
  if(u===3||u===2||u===5){h+=`<section><h3>Watch list</h3><ul class="trap">${D.watch.filter((w,i)=>(u===3&&i<2)||(u===5&&i===2)||(u===2&&i===3)).map(w=>`<li>${esc(w)}</li>`).join('')}</ul></section>`}
  $('#view').innerHTML=h}
 // ------- PART C
 function vPartC(){
- let h=`<section class="hero"><h2>Part C · 15 marks</h2><p class="lead">One question to answer out of Q26 and Q27. Both are 15 marks, so look at both and take the one you know.</p></section><div class="hmwrap"><table class="slots"><thead><tr><th>Paper</th><th>What the 15-mark options asked</th></tr></thead><tbody>`;
- PORDER.forEach(p=>{const pi=P.findIndex(x=>x.id===p);const ts=partCFor(pi);h+=`<tr><td><b>${PSHORT[p]}</b></td><td>${ts.map(t=>`<span class="pill ${t.tr.k}">${esc(t.name)}</span>`).join(' ')}</td></tr>`});
+ let h=`<section class="hero"><h2>Part C · 15 marks</h2><p class="lead">One question to answer out of Q26 and Q27. Both are 15 marks, so look at both and take the one you know.</p></section><div class="hmwrap"><table class="slots"><thead><tr><th>Paper</th><th>Q26</th><th>Q27</th></tr></thead><tbody>`;
+ PARTC.forEach(c=>{const pi=P.findIndex(x=>x.id===c.p);const ts=partCFor(pi);const tg=q=>ts.filter(t=>t.hits[pi].split('·').some(x=>x===(q?'27¹⁵':'26¹⁵'))).map(t=>`<span class="pill ${t.tr.k}">${esc(t.name)}</span>`).join(' ');h+=`<tr><th scope="row">${PLONG[c.p]}</th><td><div class="qx">${esc(c.q[0])}</div>${tg(0)}</td><td><div class="qx">${esc(c.q[1])}</div>${tg(1)}</td></tr>`});
  h+='</tbody></table></div>';
  const fam=T.filter(t=>t.hits.some(x=>x&&(x.includes('26¹⁵')||x.includes('27¹⁵')))).map(t=>({t,n:t.hits.filter(x=>x&&(x.includes('26¹⁵')||x.includes('27¹⁵'))).length})).sort((a,b)=>b.n-a.n);
  h+=`<section><h3>Families, ranked by how often they were a Part C option</h3><div class="grid2">`+fam.map(f=>`<div class="card"><span class="x">×${f.n}</span><b>${esc(f.t.name)}</b><small>${UNAME[f.t.unit]}</small></div>`).join('')+'</div></section>';
@@ -155,6 +160,6 @@ function vPlan(){
  $$('.task input').forEach(i=>i.onchange=()=>{const id=+i.dataset.id;if(i.checked)done.add(id);else done.delete(id);store.set('fla.done',[...done]);i.closest('.task').classList.toggle('done',i.checked);meter()})}
 // ------- shell
 function stat(n,l){return `<div class="stat"><b>${n}</b><span>${l}</span></div>`}
-const nRepeats=D.repeats.length;
-app.innerHTML=`<header class="top"><h1>FLA 21CSC301T · Past paper analysis</h1><p>Six papers, Nov 2024 to May 2026. What was asked, what repeats, and what to study first.</p><div class="stats">${stat(6,'papers analysed')}${stat(30,'Part B slots mapped')}${stat(T.length,'topics')}${stat(nRepeats,'repeated questions')}${stat(MCQ.length,'MCQs with answers')}</div></header>${nav()}<main id="view"></main><footer>Answers to the MCQs are worked out from theory, not from an official key. Check the flagged ones against your notes. Scans were hard to read in places.</footer>`;
+const nRepeats=REPEATS.length;
+app.innerHTML=`<header class="top"><h1>FLA 21CSC301T · Past paper analysis</h1><p>Six papers, Nov 2024 to May 2026. What was asked, what repeats, and what to study first.</p><div class="stats">${stat(6,'papers analysed')}${stat(60,'Part B options mapped')}${stat(T.length,'topics')}${stat(nRepeats,'repeated questions')}${stat(MCQ.length,'MCQs with answers')}</div></header>${nav()}<main id="view"></main><footer>Answers to the MCQs are worked out from theory, not from an official key. Check the flagged ones against your notes. Scans were hard to read in places.</footer>`;
 addEventListener('hashchange',route);route();
