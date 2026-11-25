@@ -46,22 +46,27 @@ const PARTC=[
 {p:'M26',q:['Convert S→aA|bB, B→bB|ε, A→aA|ε to GNF.','Turing machine that reads w ∈ {0,1}* and outputs ww. Show the action on 10 and 010.']}];
 // repeated questions: times, text, papers
 const REPEATS=[
-{n:5,w:'Part C: a normal-form conversion (CNF or GNF)',p:'Nov ’24, Jul ’25 P1, Jul ’25 P2, Nov ’25, May ’26'},
-{n:6,w:'Part C or Part B: a Turing machine design or calculation (multiply, copy, wwᴿ)',p:'every paper'},
-{n:5,w:'PCP or MPCP: solve a given instance or prove it undecidable',p:'May ’25, Jul ’25 P1, Jul ’25 P2, Nov ’25, May ’26'},
-{n:3,w:'Decidable versus undecidable, or recursive versus RE',p:'May ’25, Jul ’25 P2, Nov ’25 (May ’26 asks about closure under complement)'},
+{n:9,w:'A Turing machine design (any language: aⁿbⁿcⁿ, wwᴿ, palindromes, multiply, subtract, 2’s complement)',p:'every paper'},
+{n:8,w:'PCP or MPCP: solve a given instance or prove it undecidable',p:'Nov ’23, May ’24, Jul ’24, May ’25, Jul ’25 P1, Jul ’25 P2, Nov ’25, May ’26'},
+{n:6,w:'Normal-form conversion: CNF, GNF, or “is it in CNF?”',p:'Nov ’23, Jul ’24, Nov ’24, Jul ’25 P1, Jul ’25 P2, Nov ’25, May ’26 (Part C in five of them)'},
+{n:6,w:'Decidable versus undecidable, recursive versus RE, or closure of recursive languages',p:'Nov ’23, May ’24, May ’25, Jul ’25 P2, Nov ’25, May ’26'},
+{n:4,w:'Notes on P, NP, NP-complete and NP-hard',p:'May ’24, Jul ’24, Nov ’24, May ’25'},
+{n:3,w:'PCP instance A = (1, 10111, 10), B = (111, 10, 0), solve it',p:'Nov ’23, May ’24, Jul ’25 P2 (word for word)'},
+{n:3,w:'TM for aⁿbⁿcⁿ',p:'Nov ’24, Jul ’24, Nov ’25'},
+{n:3,w:'Rice’s theorem',p:'Nov ’24, Jul ’24, Jul ’25 P1'},
 {n:3,w:'Test whether a grammar is ambiguous',p:'Nov ’24, Jul ’25 P1, Nov ’25'},
 {n:3,w:'Pumping lemma proof (regular or CFL)',p:'May ’25 (Part C), Jul ’25 P2, Nov ’25'},
+{n:3,w:'Simplify a CFG by removing ε, unit and useless productions',p:'Nov ’23, May ’24, May ’25, Jul ’25 P2, May ’26'},
+{n:2,w:'Minimised DFA for the regular expression a(a+b+c)*(a+b+c)',p:'Nov ’23, Jul ’25 P2'},
+{n:2,w:'Regular expression 10+(0+11)0*1 to an automaton',p:'May ’24, Jul ’24'},
+{n:2,w:'NFA table P,Q,R,S on {0,1} to a DFA (same table)',p:'Jul ’24, Jul ’25 P1'},
 {n:2,w:'NFA with second-last symbol 1 → DFA, test 100010 and 100000',p:'Nov ’24, Jul ’25 P2 (word for word)'},
 {n:2,w:'Grammar S→0BB, B→0S|1S|0 → PDA, test 010⁴',p:'Nov ’24, Jul ’25 P1 (word for word)'},
 {n:2,w:'PDA for aⁿbⁿcᵐdᵐ',p:'Jul ’25 P1, May ’26'},
 {n:2,w:'PDA for equal numbers of a’s and b’s',p:'Jul ’25 P1, Nov ’25'},
-{n:2,w:'TM for aⁿbⁿcⁿ',p:'Nov ’24, Nov ’25'},
 {n:2,w:'TM for unary addition',p:'Nov ’24, Jul ’25 P2'},
 {n:2,w:'TM for unary multiplication (15 marks)',p:'May ’25, Nov ’25'},
-{n:2,w:'TM for wwᴿ',p:'Jul ’25 P1, Jul ’25 P2 (Part C)'},
-{n:2,w:'Rice’s theorem',p:'Nov ’24, Jul ’25 P1'},
-{n:3,w:'Simplify a CFG by removing ε, unit and useless productions',p:'May ’25, Jul ’25 P2, May ’26'}];
+{n:3,w:'TM for wwᴿ or palindromes',p:'May ’24 (Part C), Jul ’25 P1, Jul ’25 P2 (Part C)'}];
 // worked checks (computed with the engine), keyed by topic index
 const EX={
 0:'Worked check: the NFA for “second-last symbol is 1” becomes a DFA with 4 states, one for each pair of last two symbols (00, 01, 10, 11). Accepting states are 10 and 11. 100010 is accepted (second-last symbol 1). 100000 is rejected (second-last symbol 0).',

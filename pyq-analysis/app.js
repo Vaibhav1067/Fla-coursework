@@ -1,23 +1,24 @@
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const P=D.papers, UN=D.units;
+const PORDER=['N23','M24','J24','N24','M25','J1','J2','N25','M26'];
+const P=PORDER.map(id=>({id})), UN=D.units;
 const UNAME={1:'Unit 1',2:'Unit 2',3:'Unit 3',4:'Unit 4',5:'Unit 5'};
 const USHORT={1:'Finite automata and regular expressions',2:'Grammars (CFG, normal forms)',3:'Pushdown automata',4:'Turing machines',5:'Undecidability and complexity'};
-const PORDER=['N24','M25','J1','J2','N25','M26'];
-const PLONG={N24:'Nov 2024',M25:'May 2025',J1:'Jul 2025 (Paper 1)',J2:'Jul 2025 (Paper 2)',N25:'Nov 2025',M26:'May 2026'};
-const PSHORT={N24:'Nov 24',M25:'May 25',J1:'Jul 25 P1',J2:'Jul 25 P2',N25:'Nov 25',M26:'May 26'};
+const PLONG={N23:'Nov 2023',M24:'May 2024',J24:'Jul 2024',N24:'Nov 2024',M25:'May 2025',J1:'Jul 2025 (Paper 1)',J2:'Jul 2025 (Paper 2)',N25:'Nov 2025',M26:'May 2026'};
+const PSHORT={N23:'Nov 23',M24:'May 24',J24:'Jul 24',N24:'Nov 24',M25:'May 25',J1:'Jul 25 P1',J2:'Jul 25 P2',N25:'Nov 25',M26:'May 26'};
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-const tier=n=>n>=5?{k:'must',l:'Must-do'}:n>=4?{k:'high',l:'High'}:n>=3?{k:'med',l:'Medium'}:{k:'bonus',l:'Bonus'};
-const T=D.topics.map((t,i)=>({...t,id:i,count:t.hits.filter(Boolean).length}));
+const NPAP=9;
+const tier=n=>n>=7?{k:'must',l:'Must-do'}:n>=5?{k:'high',l:'High'}:n>=3?{k:'med',l:'Medium'}:{k:'bonus',l:'Bonus'};
+const T=D.topics.map((t,i)=>{const hits=(NEWHITS[i]||[null,null,null]).concat(t.hits);return {...t,hits,id:i,count:hits.filter(Boolean).length}});
 T.forEach(t=>{t.tr=tier(t.count)});
 const codeLabel=c=>c.split('·').map(x=>{const m=x.match(/^(\d\d)([ab])?(¹⁵)?$/);if(!m)return x;return m[3]?'Q'+m[1]+' (15 marks)':'Q'+m[1]+m[2]}).join(' + ');
 const hasCode=(h,code)=>!!h&&h.split('·').includes(code);
 // Part B slots: 5 units x 6 papers. A slot is answerable if any topic in the set hits either option.
-function slotTopics(u,pi){const a=[],b=[];T.filter(t=>t.unit===u).forEach(t=>{const h=t.hits[pi];if(hasCode(h,'2'+u+'a'))a.push(t.id);if(hasCode(h,'2'+u+'b'))b.push(t.id)});return{a,b}}
-function coverage(set){let ok=0,tot=0;const per={};for(let u=1;u<=5;u++){per[u]=0;for(let pi=0;pi<6;pi++){tot++;const s=slotTopics(u,pi);if([...s.a,...s.b].some(id=>set.has(id))){ok++;per[u]++}}}
- let c=0;for(let pi=0;pi<6;pi++){const ids=T.filter(t=>hasCode(t.hits[pi],'26¹⁵')||hasCode(t.hits[pi],'27¹⁵')).map(t=>t.id);if(ids.some(id=>set.has(id)))c++}
+function slotTopics(u,pi){const a=[],b=[];T.forEach(t=>{const h=t.hits[pi];if(hasCode(h,'2'+u+'a'))a.push(t.id);if(hasCode(h,'2'+u+'b'))b.push(t.id)});return{a,b}}
+function coverage(set){let ok=0,tot=0;const per={};for(let u=1;u<=5;u++){per[u]=0;for(let pi=0;pi<NPAP;pi++){tot++;const s=slotTopics(u,pi);if([...s.a,...s.b].some(id=>set.has(id))){ok++;per[u]++}}}
+ let c=0;for(let pi=0;pi<NPAP;pi++){const ids=T.filter(t=>hasCode(t.hits[pi],'26¹⁵')||hasCode(t.hits[pi],'27¹⁵')).map(t=>t.id);if(ids.some(id=>set.has(id)))c++}
  return{ok,tot,per,c}}
-const SETS={must:new Set(T.filter(t=>t.count>=5).map(t=>t.id)),high:new Set(T.filter(t=>t.count>=4).map(t=>t.id)),med:new Set(T.filter(t=>t.count>=3).map(t=>t.id)),all:new Set(T.map(t=>t.id))};
+const SETS={must:new Set(T.filter(t=>t.count>=7).map(t=>t.id)),high:new Set(T.filter(t=>t.count>=5).map(t=>t.id)),med:new Set(T.filter(t=>t.count>=3).map(t=>t.id)),all:new Set(T.map(t=>t.id))};
 const TPL={0:[0],1:[1],2:[2],3:[5,6],4:[7],5:[11],6:[12],7:[14,15,16,17],8:[19]};
 const TRAPS={0:['Start the DFA from the ε-closure of q0, not just q0.','Keep ∅ as a dead state if some subset moves nowhere.','A DFA subset is final if it holds any NFA final state.'],
 1:['Moore output is one symbol longer than the input (the start state prints too).','Mealy to Moore: a state that is reached with two different outputs must be split in two.'],
@@ -61,24 +62,27 @@ const chip=t=>`<span class="chip ${t.tr.k}">${t.tr.l}</span>`;
 function dots(t){return '<span class="dots">'+PORDER.map(p=>{const pi=P.findIndex(x=>x.id===p);const h=t.hits[pi];return `<i class="${h?'on':''}" title="${PSHORT[p]}${h?': '+codeLabel(h):''}"></i>`}).join('')+'</span>'}
 function covBar(label,v,tot,cls){const pc=Math.round(v/tot*100);return `<div class="cov"><div class="cl"><span>${label}</span><b>${pc}%</b> <small>${v} of ${tot}</small></div><div class="bar"><div class="fill ${cls}" style="width:${pc}%"></div></div></div>`}
 // ------- OVERVIEW
+function partcN(...ids){return PORDER.filter((p,pi)=>ids.some(id=>T[id].hits[pi]&&/26¹⁵|27¹⁵/.test(T[id].hits[pi]))).length}
+function partcBoth(){return PORDER.filter((p,pi)=>[6,7,14].some(id=>T[id].hits[pi]&&/26¹⁵|27¹⁵/.test(T[id].hits[pi]))).length}
+function unitWhy(u){const ts=T.filter(t=>t.unit===u).sort((a,b)=>b.count-a.count).slice(0,3);return 'Most asked here: '+ts.map(t=>t.name+' ('+t.count+' of '+NPAP+')').join('; ')+'.'}
 function vOverview(){
- const n1=T.filter(t=>t.count>=5).length,n2=T.filter(t=>t.count>=3&&t.count<5).length;
+ const n1=T.filter(t=>t.count>=7).length,n2=T.filter(t=>t.count>=3&&t.count<7).length;
  const cm=coverage(SETS.must),ch=coverage(SETS.high),cmd=coverage(SETS.med);
  const reps=REPEATS;
  let h=`<section class="hero"><h2>The short version</h2><ul class="big">
  <li><b>Same shape every time.</b> Part A is 20 MCQs, exactly 4 per unit. Part B is one 8-mark question per unit, each with an OR. Part C is one 15-mark question out of two.</li>
- <li><b>${n1} topics came up in 5 or 6 of the 6 papers.</b> Learn those first. They alone can answer ${cm.ok} of the ${cm.tot} Part B slots.</li>
- <li><b>Add the next ${n2} topics</b> (asked in 3 or 4 papers) and ${cmd.ok} of ${cmd.tot} slots are covered. Each slot has two options, so you only need one of them.</li>
- <li><b>Questions repeat.</b> ${reps.length} questions came back almost word for word, and the Part A bank (${MCQ.length} questions) has the same MCQ appearing in several papers.</li>
- <li><b>Part C</b> was a normal-form conversion (CNF or GNF) or a Turing machine design in every paper.</li></ul></section>`;
+ <li><b>${n1} topics came up in 7 or more of the 9 papers.</b> Learn those first. They alone can answer ${cm.ok} of the ${cm.tot} Part B slots.</li>
+ <li><b>Add the next ${n2} topics</b> (asked in 3 to 6 papers) and ${cmd.ok} of ${cmd.tot} slots are covered. Each slot has two options, so you only need one of them.</li>
+ <li><b>Questions repeat.</b> ${reps.length} questions or families came back, many almost word for word, and the Part A bank (${MCQ.length} questions) has the same MCQ appearing in several papers.</li>
+ <li><b>Part C:</b> a Turing machine design was an option in ${partcN(14)} of 9 papers, and a normal-form conversion (CNF or GNF) in ${partcN(6,7)}. Between them they cover ${partcBoth()} of 9.</li></ul></section>`;
  h+=`<section><h3>Where the 75 marks sit</h3><div class="marks"><div style="flex:20" class="m a"><b>Part A</b><span>20 × 1 = 20</span></div><div style="flex:40" class="m b"><b>Part B</b><span>5 × 8 = 40</span></div><div style="flex:15" class="m c"><b>Part C</b><span>1 × 15 = 15</span></div></div>
  <p class="muted">Part A is on an OMR sheet in the first 40 minutes. Parts B and C go in the answer booklet. Part B and C carry 55 of the 75 marks, so that is where practice pays most.</p></section>`;
- h+=`<section><h3>How much of Part B is covered?</h3><p class="muted">Share of the 30 Part B slots (5 units × 6 papers) where at least one of the two options is a topic you studied.</p>
- ${covBar('Must-do only ('+n1+' topics)',cm.ok,cm.tot,'c1')}${covBar('+ High, 4 papers ('+T.filter(t=>t.count===4).length+' topics)',ch.ok,ch.tot,'c2')}${covBar('+ Medium, 3 papers ('+T.filter(t=>t.count===3).length+' topics)',cmd.ok,cmd.tot,'c3')}
- <p class="muted">Part C: must-do topics alone cover ${cm.c} of 6 papers.</p></section>`;
+ h+=`<section><h3>How much of Part B is covered?</h3><p class="muted">Share of the 45 Part B slots (5 units × 9 papers) where at least one of the two options is a topic you studied.</p>
+ ${covBar('Must-do only ('+n1+' topics)',cm.ok,cm.tot,'c1')}${covBar('+ High, 5–6 papers ('+T.filter(t=>t.count>=5&&t.count<7).length+' topics)',ch.ok,ch.tot,'c2')}${covBar('+ Medium, 3–4 papers ('+T.filter(t=>t.count>=3&&t.count<5).length+' topics)',cmd.ok,cmd.tot,'c3')}
+ <p class="muted">Part C: must-do topics alone cover ${cm.c} of ${NPAP} papers.</p></section>`;
  h+=`<section><h3>Topic × paper map</h3><p class="muted">Each cell is one paper. Tap or hover for the exact question number. Darker means more questions on that topic in that paper.</p><div class="hmwrap"><table class="hm"><thead><tr><th></th>${PORDER.map(p=>`<th>${PSHORT[p]}</th>`).join('')}<th>Total</th></tr></thead><tbody>`;
  for(let u=1;u<=5;u++){h+=`<tr class="uh"><td colspan="8">${UNAME[u]} · ${USHORT[u]}</td></tr>`;
-  T.filter(t=>t.unit===u).sort((a,b)=>b.count-a.count).forEach(t=>{h+=`<tr><td class="tn"><a href="#u${u}">${esc(t.name)}</a></td>`+PORDER.map(p=>{const pi=P.findIndex(x=>x.id===p);const hh=t.hits[pi];const n=hh?hh.split('·').length:0;return `<td><span class="hc l${n}" ${hh?`data-tip="<b>${PLONG[p]}</b><br>${hh.split('·').map(c=>'<b>'+codeLabel(c)+'</b> '+esc(QTXT(pi,c))).join('<br>')}"`:''}>${n||''}</span></td>`}).join('')+`<td class="tot">${t.count}/6</td></tr>`})}
+  T.filter(t=>t.unit===u).sort((a,b)=>b.count-a.count).forEach(t=>{h+=`<tr><td class="tn"><a href="#u${u}">${esc(t.name)}</a></td>`+PORDER.map(p=>{const pi=P.findIndex(x=>x.id===p);const hh=t.hits[pi];const n=hh?hh.split('·').length:0;return `<td><span class="hc l${n}" ${hh?`data-tip="<b>${PLONG[p]}</b><br>${hh.split('·').map(c=>'<b>'+codeLabel(c)+'</b> '+esc(QTXT(pi,c))).join('<br>')}"`:''}>${n||''}</span></td>`}).join('')+`<td class="tot">${t.count}/${NPAP}</td></tr>`})}
  h+='</tbody></table></div></section>';
  h+=`<section><h3>Questions that came back</h3><p class="muted">Almost word for word. If you can do these, you have already banked marks.</p><div class="grid2">`+reps.map(r=>`<div class="card rep"><span class="x">×${r.n}</span><b>${esc(r.w)}</b><small>${esc(r.p)}</small></div>`).join('')+'</div></section>';
  h+=`<section><h3>How to write an 8-marker</h3><ol class="steps"><li>Write the definition or the idea in one line.</li><li>Draw the table, grammar or machine neatly. Label every state or symbol.</li><li>Do the steps in the standard order. Number them.</li><li>Test the string they gave you, and show the trace.</li><li>Write the answer in one line at the end.</li></ol><p class="muted">Show the steps even when you can see the answer. Marks go to the working.</p></section>`;
@@ -89,16 +93,16 @@ function topicCard(t){
  const steps=tpl.length?tpl[0].steps:null;
  const traps=TRAPS[t.id]||[];
  const asked=PORDER.map(p=>{const pi=P.findIndex(x=>x.id===p);const h=t.hits[pi];return `<li class="${h?'y':'n'}"><span class="ap">${PSHORT[p]}</span><div>${h?h.split('·').map(c=>`<span class="tg">${codeLabel(c)}</span> ${esc(QTXT(pi,c))}`).join('<br>'):'<span class="muted">not asked</span>'}</div></li>`}).join('');
- return `<details class="topic ${t.tr.k}"><summary>${chip(t)}<span class="tt">${esc(t.name)}</span>${dots(t)}<span class="cnt">${t.count}/6</span></summary><div class="tb"><p class="tipline">${esc(t.tip)}</p><h5>How it was asked</h5><ul class="asked">${asked}</ul>${EX[t.id]?`<h5>Worked check</h5><p class="ex">${esc(EX[t.id])}</p>`:''}${steps?`<h5>Answer blueprint</h5><ol class="steps">${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`:''}${traps.length?`<h5>Watch out</h5><ul class="trap">${traps.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>`:''}<a class="try" href="${'Fla-course.html'}" onclick="return false" style="display:none"></a></div></details>`}
+ return `<details class="topic ${t.tr.k}"><summary>${chip(t)}<span class="tt">${esc(t.name)}</span>${dots(t)}<span class="cnt">${t.count}/${NPAP}</span></summary><div class="tb"><p class="tipline">${esc(t.tip)}</p><h5>How it was asked</h5><ul class="asked">${asked}</ul>${EX[t.id]?`<h5>Worked check</h5><p class="ex">${esc(EX[t.id])}</p>`:''}${steps?`<h5>Answer blueprint</h5><ol class="steps">${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`:''}${traps.length?`<h5>Watch out</h5><ul class="trap">${traps.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>`:''}<a class="try" href="${'Fla-course.html'}" onclick="return false" style="display:none"></a></div></details>`}
 
-function bet(u){const ts=T.filter(t=>t.unit===u&&t.count>=3).sort((a,b)=>b.count-a.count);const due=ts.filter(t=>!t.hits[5]).map(t=>t.name);const top=ts.slice(0,2).map(t=>t.name);return `<p class="note"><b>If you had to bet:</b> ${esc(top.join(' and '))} are the safest. ${due.length?'Not in the latest paper (May 2026) but regular before, so they may be due: '+esc(due.slice(0,3).join('; '))+'.':''}</p>`}
+function bet(u){const ts=T.filter(t=>t.unit===u&&t.count>=3).sort((a,b)=>b.count-a.count);const due=ts.filter(t=>!t.hits[8]).map(t=>t.name);const top=ts.slice(0,2).map(t=>t.name);return `<p class="note"><b>If you had to bet:</b> ${esc(top.join(' and '))} are the safest. ${due.length?'Not in the latest paper (May 2026) but regular before, so they may be due: '+esc(due.slice(0,3).join('; '))+'.':''}</p>`}
 function vUnit(u){
  const ts=T.filter(t=>t.unit===u).sort((a,b)=>b.count-a.count||a.effort-b.effort);
  const sl=D.slots.find(s=>s.unit===u);
  const cv=coverage(SETS.must).per[u],ca=coverage(SETS.med).per[u];
- let h=`<section class="hero"><h2>${UN[u]}</h2><p class="lead">${sl.title}. ${esc(sl.why)}</p><p class="muted">Must-do topics here cover ${cv} of 6 papers. With the medium topics, ${ca} of 6.</p>
+ let h=`<section class="hero"><h2>${UN[u]}</h2><p class="lead">${sl.title}. ${esc(unitWhy(u))}</p><p class="muted">Must-do topics here cover ${cv} of ${NPAP} papers. With the medium topics, ${ca} of ${NPAP}.</p>
  ${bet(u)}<p class="muted">Part A: 4 MCQs on this unit in every paper. <a href="#mcq" onclick="setTimeout(()=>mcqUnit(${u}),30)">See them in the MCQ bank</a>.</p></section>`;
- h+='<div class="legend"><span class="chip must">Must-do 5–6 papers</span><span class="chip high">High 4</span><span class="chip med">Medium 3</span><span class="chip bonus">Bonus 1–2</span></div>';
+ h+='<div class="legend"><span class="chip must">Must-do 7–9 papers</span><span class="chip high">High 5–6</span><span class="chip med">Medium 3–4</span><span class="chip bonus">Bonus 1–2</span></div>';
  h+=ts.map(topicCard).join('');
  h+=`<section><h3>Every question slot, paper by paper</h3><div class="hmwrap"><table class="slots"><thead><tr><th>Paper</th><th>Option (a)</th><th>Option (b)</th></tr></thead><tbody>`+PORDER.map(p=>{const pi=P.findIndex(x=>x.id===p);const s=slotTopics(u,pi);const f=(ids,i)=>`<div class="qx">${esc(SLOTS[u][p][i])}</div>`+(ids.length?ids.map(id=>`<span class="pill ${T[id].tr.k}">${esc(T[id].name)}</span>`).join(' '):'');return `<tr><th scope="row">${PLONG[p]}</th><td>${f(s.a,0)}</td><td>${f(s.b,1)}</td></tr>`}).join('')+'</tbody></table></div><p class="muted">Each paper asks you to answer one of (a) or (b). The coloured tags show which topic card covers each option.</p></section>';
  if(u===3||u===2||u===5){h+=`<section><h3>Watch list</h3><ul class="trap">${D.watch.filter((w,i)=>(u===3&&i<2)||(u===5&&i===2)||(u===2&&i===3)).map(w=>`<li>${esc(w)}</li>`).join('')}</ul></section>`}
@@ -110,15 +114,15 @@ function vPartC(){
  h+='</tbody></table></div>';
  const fam=T.filter(t=>t.hits.some(x=>x&&(x.includes('26¹⁵')||x.includes('27¹⁵')))).map(t=>({t,n:t.hits.filter(x=>x&&(x.includes('26¹⁵')||x.includes('27¹⁵'))).length})).sort((a,b)=>b.n-a.n);
  h+=`<section><h3>Families, ranked by how often they were a Part C option</h3><div class="grid2">`+fam.map(f=>`<div class="card"><span class="x">×${f.n}</span><b>${esc(f.t.name)}</b><small>${UNAME[f.t.unit]}</small></div>`).join('')+'</div></section>';
- h+=`<section><h3>Pick-two strategy</h3><ol class="steps"><li><b>Normal forms.</b> Simplify, then CNF, then GNF on one grammar. These are the same mechanical steps you already use in Unit 2.</li><li><b>One Turing machine.</b> Unary multiplication or w wᴿ, with a transition table and a trace.</li></ol><p class="muted">Between them, one of these two families was a Part C option in every paper.</p></section>`;
+ h+=`<section><h3>Pick-two strategy</h3><ol class="steps"><li><b>Normal forms.</b> Simplify, then CNF, then GNF on one grammar. These are the same mechanical steps you already use in Unit 2.</li><li><b>One Turing machine.</b> Unary multiplication or w wᴿ, with a transition table and a trace.</li></ol><p class="muted">Between them, one of these two families was a Part C option in ${partcBoth()} of ${NPAP} papers. The other papers asked about Rice and PCP, regular expressions to automata, or PDA to CFG, which are covered in Units 1, 3 and 5.</p></section>`;
  $('#view').innerHTML=h}
 // ------- PART A
 const PA_CONCEPTS=[
-['Finite automata',[['NFA, ε-NFA and DFA have the same power','M25 Q4, N25 Q1'],['Minimal DFA counts (no two a\'s: 3, third bit: 5)','J2 Q2, M25 Q2'],['δ of a DFA is Q × Σ → Q','N24 Q4, M26 Q4'],['Regular set facts: concatenation is not commutative','N25 Q6'],['Moore and Mealy are finite automata with output','M26 Q3']]],
-['Grammars and parse trees',[['Type 0 to Type 3 and the machine for each','N24 Q8, M25 Q10, N25 Q5'],['CNF shape A → BC or A → a','M25 Q12, N25 Q7, J1 Q8'],['GNF shape A → aα','J2 Q7, M26 Q5'],['Leaves are terminals, internal nodes are variables','J2 Q6, N25 Q8, M26 Q8'],['S → aS | bS | a | b is (a+b)(a+b)*','J1 Q9, M26 Q6']]],
-['Pushdown automata',[['Z₀ is the initial stack symbol','N24 Q12, M25 Q9, M26 Q12'],['PDA accepts CFLs. NPDA is more powerful than DPDA','N24 Q5, J1 Q11, J1 Q17'],['ID / configuration is (state, unread input, stack)','N25 Q10, M26 Q11'],['Which languages are DCFL (wcwᴿ yes, wwᴿ no)','J1 Q13, J1 Q14']]],
-['Turing machines',[['Halting states are accept and reject','N24 Q16, M25 Q16 style, J1 Q15, J2 Q16'],['δ undefined means the machine halts','J2 Q15'],['ID of a TM: state and tape','J2 Q14, M26 Q15'],['RE is closed under union and intersection, not complement','M25 Q16, N25 Q15'],['NTM and DTM are equal in power. A UTM simulates any TM','M26 Q16, N25 Q13']]],
-['Undecidability and complexity',[['Decidable = has an algorithm that always halts','N24 Q17, M25 Q17'],['L and L̄ both RE ⇒ L recursive','J1 Q19, M26 Q17'],['NP-complete = NP-hard and in NP. SAT is NP-complete','N24 Q19, N25 Q17, N25 Q19'],['NP means verifiable in polynomial time','N25 Q16, N25 Q20'],['MPCP forces the first tile','J2 Q18, N25 Q18'],['If P ≠ NP, NP-complete ∩ P = ∅','M26 Q20']]]];
+['Finite automata',[['NFA, ε-NFA and DFA have the same power','M25 Q4, N25 Q1'],['Minimal DFA counts (no two a\'s: 3, third bit: 5)','J2 Q2, M25 Q2'],['δ of a DFA is Q × Σ → Q','N24 Q4, M26 Q4'],['Regular set facts: concatenation is not commutative','N25 Q6'],['Moore and Mealy are finite automata with output','M26 Q3'],['An NFA with N states needs up to 2ᴺ DFA states','M24 Q2'],['Regular iff accepted by a DFA; FA cannot remember large memory','M24 Q3, J24 Q2'],['(x+y)* = (x*y*)*','J24 Q1']]],
+['Grammars and parse trees',[['Type 0 to Type 3 and the machine for each','N24 Q8, M25 Q10, N25 Q5'],['CNF shape A → BC or A → a','M25 Q12, N25 Q7, J1 Q8'],['GNF shape A → aα','J2 Q7, M26 Q5'],['Leaves are terminals, internal nodes are variables','J2 Q6, N25 Q8, M26 Q8'],['Ambiguous = more than one parse tree for a string','N23 Q6, M24 Q6'],['Context-free: one non-terminal on the left','J24 Q7'],['S → aS | bS | a | b is (a+b)(a+b)*','J1 Q9, M26 Q6']]],
+['Pushdown automata',[['Z₀ is the initial stack symbol','N24 Q12, M25 Q9, M26 Q12'],['PDA accepts CFLs. NPDA is more powerful than DPDA','N24 Q5, J1 Q11, J1 Q17'],['ID / configuration is (state, unread input, stack)','N25 Q10, M26 Q11'],['Which languages are DCFL (wcwᴿ yes, wwᴿ no)','J1 Q13, J1 Q14'],['A PDA uses a stack. A PDA with two stacks equals a TM','M24 Q9, J24 Q12'],['CFLs are not closed under intersection','M24 Q12, N24 Q6']]],
+['Turing machines',[['Halting states are accept and reject','N24 Q16, M25 Q16 style, J1 Q15, J2 Q16'],['δ undefined means the machine halts','J2 Q15'],['ID of a TM: state and tape','J2 Q14, M26 Q15'],['RE is closed under union and intersection, not complement','M25 Q16, N25 Q15'],['NTM and DTM are equal in power. A UTM simulates any TM','M26 Q16, N25 Q13'],['A TM has infinite memory (tape). Type 0 = RE','M24 Q14, M24 Q15'],['Seven tuples describe a TM','J24 Q15'],['CFL ⊂ CS ⊂ recursive ⊂ RE','J24 Q18']]],
+['Undecidability and complexity',[['Decidable = has an algorithm that always halts','N24 Q17, M25 Q17'],['L and L̄ both RE ⇒ L recursive','J1 Q19, M26 Q17'],['NP-complete = NP-hard and in NP. SAT is NP-complete','N24 Q19, N25 Q17, N25 Q19'],['NP means verifiable in polynomial time','N25 Q16, N25 Q20'],['MPCP forces the first tile','J2 Q18, N25 Q18'],['If P ≠ NP, NP-complete ∩ P = ∅','M26 Q20'],['The halting problem is RE and undecidable','N23 Q18'],['PCP is an undecidable decision problem','M24 Q18'],['Subset sum is NP (in fact NP-complete)','M24 Q20']]]];
 function vPartA(){
  let h=`<section class="hero"><h2>Part A · 20 MCQs</h2><p class="lead">Exactly 4 MCQs per unit in every paper, in unit order: Q1–4 Unit 1, Q5–8 Unit 2, Q9–12 Unit 3, Q13–16 Unit 4, Q17–20 Unit 5. They are mostly definitions, and the same facts come round again and again.</p></section>`;
  PA_CONCEPTS.forEach(([t,rows],i)=>{h+=`<section><h3>${UNAME[i+1]} · ${t}</h3><div class="hmwrap"><table class="slots"><thead><tr><th>Concept</th><th>Seen in</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r[0])}</td><td class="muted">${esc(r[1])}</td></tr>`).join('')}</tbody></table></div></section>`});
@@ -131,7 +135,7 @@ const stars=new Set(store.get('fla.stars',[]));
 function mcqUnit(u){F.u=String(u);vMcq()}
 function vMcq(){
  const nc=MCQ.filter(m=>m.flag).length;
- $('#view').innerHTML=`<section class="hero"><h2>MCQ bank</h2><p class="lead">All ${MCQ.length} Part A questions from the six papers, with answers worked out from theory. This is not an official key. ${nc} questions are flagged because the scan, the wording or a missing figure leaves doubt.</p></section>
+ $('#view').innerHTML=`<section class="hero"><h2>MCQ bank</h2><p class="lead">All ${MCQ.length} Part A questions from the nine papers, with answers worked out from theory. This is not an official key. ${nc} questions are flagged because the scan, the wording or a missing figure leaves doubt.</p></section>
  <div class="filters"><select id="fp"><option value="">All papers</option>${PORDER.map(p=>`<option value="${p}">${PLONG[p]}</option>`).join('')}</select><select id="fu"><option value="">All units</option>${[1,2,3,4,5].map(u=>`<option value="${u}">${UNAME[u]}</option>`).join('')}</select><input id="fq" type="search" placeholder="Search questions"><label><input type="checkbox" id="fc"> Only Check</label><label><input type="checkbox" id="fs"> Only ☆ Revise</label><label><input type="checkbox" id="fa"> Show all answers</label></div><div id="mc"></div>`;
  $('#fp').value=F.p;$('#fu').value=F.u;$('#fq').value=F.q;$('#fc').checked=F.chk;$('#fs').checked=F.star;$('#fa').checked=F.all;
  const upd=()=>{F.p=$('#fp').value;F.u=$('#fu').value;F.q=$('#fq').value;F.chk=$('#fc').checked;F.star=$('#fs').checked;F.all=$('#fa').checked;renderMcq()};
@@ -151,15 +155,15 @@ function renderMcq(){
 const EST={1:20,2:35,3:50};
 function vPlan(){
  const done=new Set(store.get('fla.done',[]));
- const ph=[['Phase 1 · Must-do',T.filter(t=>t.count>=5),'Learn these first. Five or six papers each.'],['Phase 2 · High',T.filter(t=>t.count===4),'Four papers each.'],['Phase 3 · Medium',T.filter(t=>t.count===3),'Three papers each.'],['Phase 4 · Bonus',T.filter(t=>t.count<=2),'Only if you have time.']];
+ const ph=[['Phase 1 · Must-do',T.filter(t=>t.count>=7),'Learn these first. Seven or more of the nine papers.'],['Phase 2 · High',T.filter(t=>t.count>=5&&t.count<7),'Five or six papers each.'],['Phase 3 · Medium',T.filter(t=>t.count>=3&&t.count<5),'Three or four papers each.'],['Phase 4 · Bonus',T.filter(t=>t.count<=2),'Only if you have time.']];
  let h=`<section class="hero"><h2>Study plan</h2><p class="lead">Tick a topic when you can do it without looking. The meter shows how much of Part B that covers.</p><div id="meter"></div></section>`;
- ph.forEach(([n,ts,d],pi)=>{const min=ts.reduce((a,t)=>a+EST[t.effort],0);h+=`<section><h3>${n}</h3><p class="muted">${d} About ${Math.round(min/60*10)/10} hours in total.</p>`+ts.sort((a,b)=>a.unit-b.unit).map(t=>`<label class="task ${done.has(t.id)?'done':''}"><input type="checkbox" data-id="${t.id}" ${done.has(t.id)?'checked':''}><span>${esc(t.name)}<small>${UNAME[t.unit]} · ${t.count}/6 papers · about ${EST[t.effort]} min</small></span></label>`).join('')+'</section>'});
+ ph.forEach(([n,ts,d],pi)=>{const min=ts.reduce((a,t)=>a+EST[t.effort],0);h+=`<section><h3>${n}</h3><p class="muted">${d} About ${Math.round(min/60*10)/10} hours in total.</p>`+ts.sort((a,b)=>a.unit-b.unit).map(t=>`<label class="task ${done.has(t.id)?'done':''}"><input type="checkbox" data-id="${t.id}" ${done.has(t.id)?'checked':''}><span>${esc(t.name)}<small>${UNAME[t.unit]} · ${t.count}/${NPAP} papers · about ${EST[t.effort]} min</small></span></label>`).join('')+'</section>'});
  h+=`<section><h3>Alongside</h3><ul class="trap"><li>Go through the MCQ bank once per unit (10 minutes each). Star anything you got wrong.</li><li>Do one Part C practice: a CNF then GNF conversion and a Turing machine.</li><li>Write out the three repeated 8-markers from the Overview by hand.</li><li>Last hour: read the Part A concepts page and the starred MCQs.</li></ul></section>`;
  $('#view').innerHTML=h;
- const meter=()=>{const c=coverage(done);$('#meter').innerHTML=covBar('Part B slots covered by your ticked topics',c.ok,c.tot,'c1')+`<p class="muted">Part C covered in ${c.c} of 6 papers.</p>`};meter();
+ const meter=()=>{const c=coverage(done);$('#meter').innerHTML=covBar('Part B slots covered by your ticked topics',c.ok,c.tot,'c1')+`<p class="muted">Part C covered in ${c.c} of ${NPAP} papers.</p>`};meter();
  $$('.task input').forEach(i=>i.onchange=()=>{const id=+i.dataset.id;if(i.checked)done.add(id);else done.delete(id);store.set('fla.done',[...done]);i.closest('.task').classList.toggle('done',i.checked);meter()})}
 // ------- shell
 function stat(n,l){return `<div class="stat"><b>${n}</b><span>${l}</span></div>`}
 const nRepeats=REPEATS.length;
-app.innerHTML=`<header class="top"><h1>FLA 21CSC301T · Past paper analysis</h1><p>Six papers, Nov 2024 to May 2026. What was asked, what repeats, and what to study first.</p><div class="stats">${stat(6,'papers analysed')}${stat(60,'Part B options mapped')}${stat(T.length,'topics')}${stat(nRepeats,'repeated questions')}${stat(MCQ.length,'MCQs with answers')}</div></header>${nav()}<main id="view"></main><footer>Answers to the MCQs are worked out from theory, not from an official key. Check the flagged ones against your notes. Scans were hard to read in places.</footer>`;
+app.innerHTML=`<header class="top"><h1>FLA 21CSC301T · Past paper analysis</h1><p>Nine papers, Nov 2023 to May 2026. What was asked, what repeats, and what to study first.</p><div class="stats">${stat(9,'papers analysed')}${stat(90,'Part B options mapped')}${stat(T.length,'topics')}${stat(nRepeats,'repeated questions')}${stat(MCQ.length,'MCQs with answers')}</div></header>${nav()}<main id="view"></main><footer>Answers to the MCQs are worked out from theory, not from an official key. Check the flagged ones against your notes. Scans were hard to read in places.</footer>`;
 addEventListener('hashchange',route);route();
